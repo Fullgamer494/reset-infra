@@ -1,0 +1,36 @@
+{
+  "name": "reset-infra",
+  "version": "1.0.0",
+  "description": "ReSet – Database infrastructure, Prisma migrations & Zod schema generation",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "prisma/schema.prisma"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:migrate": "npx prisma migrate dev",
+    "db:generate": "npx prisma generate",
+    "postinstall": "npx prisma generate",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.3.1"
+  },
+  "peerDependencies": {
+    "@prisma/client": "^7.4.0",
+    "zod": "^3.22.0 || ^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "prisma": "^7.4.1",
+    "typescript": "^5.9.3",
+    "zod-prisma-types": "^3.3.11"
+  }
+}

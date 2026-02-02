@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Environment
+.env
+
+# Build output
+dist/
+
+# Prisma
+prisma/*.db
+prisma/*.db-journal
+
+# Generated (regenerable via db:generate)
+src/schemas/*.ts
+!src/schemas/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
