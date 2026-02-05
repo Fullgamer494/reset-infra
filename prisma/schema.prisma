@@ -1,0 +1,212 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+generator zod {
+  provider = "zod-prisma-types"
+  output   = "../src/schemas"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["auth", "tracking", "emergency", "core"]
+}
+
+// ==========================================
+// 1. SCHEMA: AUTH
+// ==========================================
+model User {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String   @db.VarChar(100)
+  email         String   @unique @db.VarChar(150)
+  password_hash String   @db.Text
+  role          String?  @db.VarChar(20)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
+
+  addictions              UserAddiction?
+  daily_logs              DailyLog[]
+  sponsorships_as_sponsor Sponsorship[]    @relation("SponsorRelation")
+  sponsorships_as_addict  Sponsorship[]    @relation("AddictRelation")
+  contacts                SupportContact[]
+  alerts                  EmergencyAlert[]
+  streak                  Streak?
+  absences                LogAbsence[]
+
+  @@map("users")
+  @@schema("auth")
+}
+
+// ==========================================
+// 2. SCHEMA: CORE
+// ==========================================
+model CravingLevel {
+  id          String     @id @default(uuid()) @db.Uuid
+  level       Int        @unique // El valor 1-10
+  label       String     @db.VarChar(50)
+  description String?    @db.Text
+  daily_logs  DailyLog[]
+
+  @@map("craving_levels")
+  @@schema("core")
+}
+
+model EmotionalState {
+  id          String     @id @default(uuid()) @db.Uuid
+  level       Int        @unique // El valor 1-10
+  label       String     @db.VarChar(50)
+  description String?    @db.Text
+  daily_logs  DailyLog[]
+
+  @@map("emotional_states")
+  @@schema("core")
+}
+
+model UserAddiction {
+  id             String   @id @default(uuid()) @db.Uuid
+  user_id        String   @unique @db.Uuid
+  custom_name    String   @db.VarChar(100)
+  classification String?  @db.VarChar(50)
+  is_active      Boolean  @default(true)
+  registered_at  DateTime @default(now())
+  created_at     DateTime @default(now())
+
+  user   User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  streak Streak?
+  alerts EmergencyAlert[]
+
+  @@map("user_addictions")
+  @@schema("core")
+}
+
+model Sponsorship {
+  id                 String    @id @default(uuid()) @db.Uuid
+  sponsor_id         String?   @unique @db.Uuid
+  addict_id          String?   @unique @db.Uuid
+  started_at         DateTime  @default(now())
+  ended_at           DateTime?
+  is_active          Boolean   @default(true)
+  termination_reason String?   @db.Text
+  created_at         DateTime  @default(now())
+
+  sponsor User? @relation("SponsorRelation", fields: [sponsor_id], references: [id])
+  addict  User? @relation("AddictRelation", fields: [addict_id], references: [id])
+
+  @@map("sponsorships")
+  @@schema("core")
+}
+
+// ==========================================
+// 3. SCHEMA: TRACKING
+// ==========================================
+model DailyLog {
+  id                 String   @id @default(uuid()) @db.Uuid
+  user_id            String   @db.Uuid
+  log_date           DateTime @db.Date
+  consumed           Boolean  @default(false)
+  craving_level_id   String?  @db.Uuid
+  emotional_state_id String?  @db.Uuid
+  triggers           String?  @db.Text
+  notes              String?  @db.Text
+  created_at         DateTime @default(now())
+
+  user            User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  craving_level   CravingLevel?   @relation(fields: [craving_level_id], references: [id])
+  emotional_state EmotionalState? @relation(fields: [emotional_state_id], references: [id])
+
+  @@unique([user_id, log_date])
+  @@map("daily_logs")
+  @@schema("tracking")
+}
+
+model StreakEvent {
+  id                 String   @id @default(uuid()) @db.Uuid
+  streak_id          String   @db.Uuid
+  emergency_alert_id String?  @db.Uuid
+  event_type         String?  @db.VarChar(20)
+  event_date         DateTime
+  days_achieved      Int?
+  avg_craving_period Decimal? @db.Decimal(4, 2)
+  avg_emotion_period Decimal? @db.Decimal(4, 2)
+  created_at         DateTime @default(now())
+
+  streak   Streak       @relation(fields: [streak_id], references: [id], onDelete: Cascade)
+  absences LogAbsence[]
+
+  @@map("streak_events")
+  @@schema("tracking")
+}
+
+model LogAbsence {
+  id              String    @id @default(uuid()) @db.Uuid
+  user_id         String    @db.Uuid
+  streak_id       String    @db.Uuid
+  last_log_date   DateTime? @db.Date
+  detected_at     DateTime  @default(now())
+  absence_hours   Int?
+  event_generated Boolean   @default(false)
+  streak_event_id String?   @db.Uuid
+
+  user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  streak_event StreakEvent? @relation(fields: [streak_event_id], references: [id])
+
+  @@map("log_absences")
+  @@schema("tracking")
+}
+
+// ==========================================
+// 4. SCHEMA: EMERGENCY
+// ==========================================
+model SupportContact {
+  id                  String   @id @default(uuid()) @db.Uuid
+  user_id             String   @db.Uuid
+  contact_name        String   @db.VarChar(100)
+  phone               String?  @db.VarChar(20)
+  email               String?  @db.VarChar(150)
+  relationship        String?  @db.VarChar(50)
+  custom_relationship String?  @db.Text
+  is_active           Boolean  @default(true)
+  priority_order      Int?
+  created_at          DateTime @default(now())
+  updated_at          DateTime @default(now()) @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("support_contacts")
+  @@schema("emergency")
+}
+
+model EmergencyAlert {
+  id                  String   @id @default(uuid()) @db.Uuid
+  user_id             String   @db.Uuid
+  user_addiction_id   String   @db.Uuid
+  activated_at        DateTime @default(now())
+  resulted_in_relapse Boolean  @default(false)
+  resolution_notes    String?  @db.Text
+  created_at          DateTime @default(now())
+
+  user      User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  addiction UserAddiction @relation(fields: [user_addiction_id], references: [id])
+
+  @@map("emergency_alerts")
+  @@schema("emergency")
+}
+
+model Streak {
+  id                String    @id @default(uuid()) @db.Uuid
+  user_id           String    @unique @db.Uuid
+  user_addiction_id String    @unique @db.Uuid
+  status            String?   @db.VarChar(20)
+  started_at        DateTime
+  day_counter       Int       @default(0)
+  last_log_date     DateTime? @db.Date
+  updated_at        DateTime  @default(now()) @updatedAt
+
+  user      User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  addiction UserAddiction @relation(fields: [user_addiction_id], references: [id], onDelete: Cascade)
+  events    StreakEvent[]
+
+  @@map("streaks")
+  @@schema("core")
+}
