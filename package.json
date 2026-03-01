@@ -1,6 +1,6 @@
 {
   "name": "reset-infra",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ReSet – Database infrastructure, Prisma migrations & Zod schema generation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,7 +14,6 @@
     "db:down": "docker compose down",
     "db:migrate": "npx prisma migrate dev",
     "db:generate": "npx prisma generate",
-    "postinstall": "npx prisma generate",
     "prepublishOnly": "npm run build"
   },
   "keywords": [],

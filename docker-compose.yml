@@ -4,6 +4,7 @@ services:
   postgres:
     image: postgres:17
     container_name: reset_postgres
+    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qwerty123}
