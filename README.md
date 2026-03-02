@@ -38,3 +38,26 @@ import { NombreDelModeloSchema } from 'reset-infra';
 - `npm run db:down`: Detiene y elimina el contenedor de PostgreSQL.
 - `npm run db:migrate`: Aplica los cambios estructurales detectados en `schema.prisma` hacia la base de datos en desarrollo.
 - `npm run db:generate`: Invoca el generador del ORM para reconstruir la instancia local de Prisma e invocar dependencias de generacion secundarias (como los esquemas de Zod).
+
+## Integración con MongoDB (Foro)
+
+Además de la base de datos relacional PostgreSQL, esta infraestructura orquesta localmente un servicio secundario de **MongoDB** para alojar de forma ágil y eficiente los datos dinámicos generados por el módulo del foro (publicaciones, comentarios, reacciones e hilos de anidación).
+
+### Relación entre Bases de Datos (SQL vs NoSQL)
+
+Este ecosistema adopta un modelo híbrido intencional donde las tablas estructuradas (usuarios, pagos, configuración) se mantienen firmes y seguras en PostgreSQL, mientras que el volumen transaccional de lectura/escritura del foro se desplaza a MongoDB. 
+
+**Dado que MongoDB opera de forma independiente y sin llaves foráneas reales hacia PostgreSQL**, la relación se establece y se aplica lógicamente en la **capa del Backend**.
+
+El flujo de integración ocurre de la siguiente forma:
+1. El backend (ej. usando Node.Js con Mongoose o el adaptador NoSQL de Prisma) decodifica la sesión activa o el token JWT del usuario emisor del Post/Comentario.
+2. Identifica su Primary Key proveniente de PostgreSQL (un string `UUID`).
+3. El Backend persiste este string `UUID` dentro del documento JSON de MongoDB, almacenándolo en el campo estricto designado llamado `authorId`.
+
+Al momento de consultar un hilo del foro, el Backend extrae de MongoDB la colección de Posts/Comentarios, obtiene el array de `authorId` resultantes y lanza una consulta en bloque hacia PostgreSQL para obtener y mapear el alias o avatar de los respectivos usuarios.
+
+### Componentes de Infraestructura NoSQL
+
+- **Contenedor MongoDB (`mongo:7.0`)**: Base de datos documental corriendo en el puerto 27017.
+- **Script de Inicialización**: Existe un archivo `mongo/init-mongo.js` inyectado automáticamente en el volumen de Docker que fuerza la creación asíncrona de las colecciones `posts` y `comments`. Este script también estipula reglas de **JSON Schema Validation** que blindan la base de datos a un nivel nativo; obligando a que, por ejemplo, los campos `authorId` (que actúan como el vínculo virtual a Postgres) no puedan ser nulos ni obviar su tipado tipo cadena (String).
+- **Contenedor Mongo Express**: Despliegue local de una herramienta con Interfaz Gráfica (GUI) servida en el puerto **`8081`**. Si deseas administrar registros, visualizar colecciones o purgar foros localmente por medio del navegador web, deberás acceder e ingresar credenciales listadas en el archivo local `.env` (usuario por defecto: `admin` / clave: `password`).
