@@ -30,8 +30,9 @@ services:
       - .:/app
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-qwerty123}@postgres:5432/${POSTGRES_DB:-reset}"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-qwerty123}
     command: >
-      sh -c " npm prune --production=false && npx prisma db push --accept-data-loss "
+      sh -c " apk add --no-cache postgresql-client && npm prune --production=false && npx prisma db push --accept-data-loss && PGPASSWORD=$$POSTGRES_PASSWORD psql -h postgres -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-reset} -f /app/postgres/views_and_udfs.sql "
     depends_on:
       postgres:
         condition: service_healthy
