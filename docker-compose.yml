@@ -16,6 +16,25 @@ services:
       - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-reset}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  prisma-setup:
+    image: node:20-alpine
+    container_name: reset_prisma_setup
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-qwerty123}@postgres:5432/${POSTGRES_DB:-reset}"
+    command: >
+      sh -c " npm prune --production=false && npx prisma db push --accept-data-loss "
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:
