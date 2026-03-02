@@ -54,7 +54,13 @@ El flujo de integración ocurre de la siguiente forma:
 2. Identifica su Primary Key proveniente de PostgreSQL (un string `UUID`).
 3. El Backend persiste este string `UUID` dentro del documento JSON de MongoDB, almacenándolo en el campo estricto designado llamado `authorId`.
 
-Al momento de consultar un hilo del foro, el Backend extrae de MongoDB la colección de Posts/Comentarios, obtiene el array de `authorId` resultantes y lanza una consulta en bloque hacia PostgreSQL para obtener y mapear el alias o avatar de los respectivos usuarios.
+**Manejo de Anonimato (`isAnonymous`)**:
+Para soportar publicaciones anónimas sin perder la trazabilidad administrativa, las colecciones obligan el uso de una bandera booleana `isAnonymous`.
+- El backend **siempre** debe guardar el `authorId` real del usuario en MongoDB (incluso si es anónimo).
+- Si el cliente envía `isAnonymous: true`, el backend guardará este valor en el documento.
+- Al momento de consultar los hilos del foro, el Backend **no** debe incluir en el listado resultante los datos personales (alias, avatar) de aquellos posts/comentarios que tengan `isAnonymous: true`. La trazabilidad se mantiene interna en base de datos, pero el usuario se expone como Anónimo hacia el frontend.
+
+Al momento de consultar un hilo del foro público, el Backend extrae de MongoDB la colección de Posts/Comentarios, obtiene el array de `authorId` resultantes (omitiendo o enmascarando los anónimos) y lanza una consulta en bloque hacia PostgreSQL para obtener y mapear el alias o avatar de los respectivos usuarios.
 
 ### Componentes de Infraestructura NoSQL
 

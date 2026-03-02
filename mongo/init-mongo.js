@@ -4,11 +4,12 @@ db.createCollection("posts", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["authorId", "title", "content", "createdAt"],
+            required: ["authorId", "title", "content", "isAnonymous", "createdAt"],
             properties: {
                 authorId: { bsonType: "string" },
                 title: { bsonType: "string" },
                 content: { bsonType: "string" },
+                isAnonymous: { bsonType: "bool" },
                 images: {
                     bsonType: "array",
                     items: { bsonType: "string" }
@@ -34,12 +35,13 @@ db.createCollection("comments", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["postId", "authorId", "content", "createdAt"],
+            required: ["postId", "authorId", "content", "isAnonymous", "createdAt"],
             properties: {
                 postId: { bsonType: "objectId" },
                 parentId: { bsonType: ["objectId", "null"] },
                 authorId: { bsonType: "string" },
                 content: { bsonType: "string" },
+                isAnonymous: { bsonType: "bool" },
                 reactionUps: { bsonType: "int" },
                 createdAt: { bsonType: "date" },
                 updatedAt: { bsonType: "date" }
