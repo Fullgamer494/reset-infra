@@ -35,9 +35,9 @@ export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCo
 
 export const UserScalarFieldEnumSchema = z.enum(['id','name','email','password_hash','role','created_at','updated_at']);
 
-export const CravingLevelScalarFieldEnumSchema = z.enum(['id','level','label','description']);
+export const CravingLevelScalarFieldEnumSchema = z.enum(['id','level','label','description','recommendation']);
 
-export const EmotionalStateScalarFieldEnumSchema = z.enum(['id','level','label','description']);
+export const EmotionalStateScalarFieldEnumSchema = z.enum(['id','level','label','description','category']);
 
 export const UserAddictionScalarFieldEnumSchema = z.enum(['id','user_id','custom_name','classification','is_active','registered_at','created_at']);
 
@@ -58,6 +58,11 @@ export const StreakScalarFieldEnumSchema = z.enum(['id','user_id','user_addictio
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
+
+export const UserRoleSchema = z.enum(['ADICTO','PADRINO','ADMIN']);
+
+export type UserRoleType = `${z.infer<typeof UserRoleSchema>}`
+
 /////////////////////////////////////////
 // MODELS
 /////////////////////////////////////////
@@ -67,11 +72,11 @@ export const QueryModeSchema = z.enum(['default','insensitive']);
 /////////////////////////////////////////
 
 export const UserSchema = z.object({
+  role: UserRoleSchema,
   id: z.uuid(),
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 })
@@ -87,6 +92,7 @@ export const CravingLevelSchema = z.object({
   level: z.number().int(),
   label: z.string(),
   description: z.string(),
+  recommendation: z.string(),
 })
 
 export type CravingLevel = z.infer<typeof CravingLevelSchema>
@@ -100,6 +106,7 @@ export const EmotionalStateSchema = z.object({
   level: z.number().int(),
   label: z.string(),
   description: z.string(),
+  category: z.string(),
 })
 
 export type EmotionalState = z.infer<typeof EmotionalStateSchema>
@@ -327,6 +334,7 @@ export const CravingLevelSelectSchema: z.ZodType<Prisma.CravingLevelSelect> = z.
   level: z.boolean().optional(),
   label: z.boolean().optional(),
   description: z.boolean().optional(),
+  recommendation: z.boolean().optional(),
   daily_logs: z.union([z.boolean(),z.lazy(() => DailyLogFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => CravingLevelCountOutputTypeArgsSchema)]).optional(),
 }).strict()
@@ -357,6 +365,7 @@ export const EmotionalStateSelectSchema: z.ZodType<Prisma.EmotionalStateSelect> 
   level: z.boolean().optional(),
   label: z.boolean().optional(),
   description: z.boolean().optional(),
+  category: z.boolean().optional(),
   daily_logs: z.union([z.boolean(),z.lazy(() => DailyLogFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => EmotionalStateCountOutputTypeArgsSchema)]).optional(),
 }).strict()
@@ -620,7 +629,7 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.strictOb
   name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   email: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   password_hash: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  role: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  role: z.union([ z.lazy(() => EnumUserRoleFilterSchema), z.lazy(() => UserRoleSchema) ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   addictions: z.lazy(() => UserAddictionListRelationFilterSchema).optional(),
@@ -671,7 +680,7 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   NOT: z.union([ z.lazy(() => UserWhereInputSchema), z.lazy(() => UserWhereInputSchema).array() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   password_hash: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  role: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  role: z.union([ z.lazy(() => EnumUserRoleFilterSchema), z.lazy(() => UserRoleSchema) ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   addictions: z.lazy(() => UserAddictionListRelationFilterSchema).optional(),
@@ -705,7 +714,7 @@ export const UserScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserScal
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   email: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   password_hash: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
-  role: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
+  role: z.union([ z.lazy(() => EnumUserRoleWithAggregatesFilterSchema), z.lazy(() => UserRoleSchema) ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
 });
@@ -718,6 +727,7 @@ export const CravingLevelWhereInputSchema: z.ZodType<Prisma.CravingLevelWhereInp
   level: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  recommendation: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
 });
 
@@ -726,6 +736,7 @@ export const CravingLevelOrderByWithRelationInputSchema: z.ZodType<Prisma.Cravin
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  recommendation: z.lazy(() => SortOrderSchema).optional(),
   daily_logs: z.lazy(() => DailyLogOrderByRelationAggregateInputSchema).optional(),
 });
 
@@ -749,6 +760,7 @@ export const CravingLevelWhereUniqueInputSchema: z.ZodType<Prisma.CravingLevelWh
   NOT: z.union([ z.lazy(() => CravingLevelWhereInputSchema), z.lazy(() => CravingLevelWhereInputSchema).array() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  recommendation: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
 }));
 
@@ -757,6 +769,7 @@ export const CravingLevelOrderByWithAggregationInputSchema: z.ZodType<Prisma.Cra
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  recommendation: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => CravingLevelCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => CravingLevelAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => CravingLevelMaxOrderByAggregateInputSchema).optional(),
@@ -772,6 +785,7 @@ export const CravingLevelScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.
   level: z.union([ z.lazy(() => IntWithAggregatesFilterSchema), z.number() ]).optional(),
   label: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
+  recommendation: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
 });
 
 export const EmotionalStateWhereInputSchema: z.ZodType<Prisma.EmotionalStateWhereInput> = z.strictObject({
@@ -782,6 +796,7 @@ export const EmotionalStateWhereInputSchema: z.ZodType<Prisma.EmotionalStateWher
   level: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  category: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
 });
 
@@ -790,6 +805,7 @@ export const EmotionalStateOrderByWithRelationInputSchema: z.ZodType<Prisma.Emot
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  category: z.lazy(() => SortOrderSchema).optional(),
   daily_logs: z.lazy(() => DailyLogOrderByRelationAggregateInputSchema).optional(),
 });
 
@@ -813,6 +829,7 @@ export const EmotionalStateWhereUniqueInputSchema: z.ZodType<Prisma.EmotionalSta
   NOT: z.union([ z.lazy(() => EmotionalStateWhereInputSchema), z.lazy(() => EmotionalStateWhereInputSchema).array() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  category: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
 }));
 
@@ -821,6 +838,7 @@ export const EmotionalStateOrderByWithAggregationInputSchema: z.ZodType<Prisma.E
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  category: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => EmotionalStateCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => EmotionalStateAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => EmotionalStateMaxOrderByAggregateInputSchema).optional(),
@@ -836,6 +854,7 @@ export const EmotionalStateScalarWhereWithAggregatesInputSchema: z.ZodType<Prism
   level: z.union([ z.lazy(() => IntWithAggregatesFilterSchema), z.number() ]).optional(),
   label: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   description: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
+  category: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
 });
 
 export const UserAddictionWhereInputSchema: z.ZodType<Prisma.UserAddictionWhereInput> = z.strictObject({
@@ -1549,7 +1568,7 @@ export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.strict
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
@@ -1567,7 +1586,7 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreat
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -1585,7 +1604,7 @@ export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.strict
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -1603,7 +1622,7 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -1621,7 +1640,7 @@ export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> = 
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
 });
@@ -1631,7 +1650,7 @@ export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyM
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -1641,7 +1660,7 @@ export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedU
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -1649,16 +1668,18 @@ export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedU
 export const CravingLevelCreateInputSchema: z.ZodType<Prisma.CravingLevelCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  recommendation: z.string().optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutCraving_levelInputSchema).optional(),
 });
 
 export const CravingLevelUncheckedCreateInputSchema: z.ZodType<Prisma.CravingLevelUncheckedCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  recommendation: z.string().optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutCraving_levelInputSchema).optional(),
 });
 
@@ -1667,6 +1688,7 @@ export const CravingLevelUpdateInputSchema: z.ZodType<Prisma.CravingLevelUpdateI
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  recommendation: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutCraving_levelNestedInputSchema).optional(),
 });
 
@@ -1675,14 +1697,16 @@ export const CravingLevelUncheckedUpdateInputSchema: z.ZodType<Prisma.CravingLev
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  recommendation: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutCraving_levelNestedInputSchema).optional(),
 });
 
 export const CravingLevelCreateManyInputSchema: z.ZodType<Prisma.CravingLevelCreateManyInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  recommendation: z.string().optional(),
 });
 
 export const CravingLevelUpdateManyMutationInputSchema: z.ZodType<Prisma.CravingLevelUpdateManyMutationInput> = z.strictObject({
@@ -1690,6 +1714,7 @@ export const CravingLevelUpdateManyMutationInputSchema: z.ZodType<Prisma.Craving
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  recommendation: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const CravingLevelUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CravingLevelUncheckedUpdateManyInput> = z.strictObject({
@@ -1697,21 +1722,24 @@ export const CravingLevelUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Cravin
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  recommendation: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const EmotionalStateCreateInputSchema: z.ZodType<Prisma.EmotionalStateCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  category: z.string().optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutEmotional_stateInputSchema).optional(),
 });
 
 export const EmotionalStateUncheckedCreateInputSchema: z.ZodType<Prisma.EmotionalStateUncheckedCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  category: z.string().optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutEmotional_stateInputSchema).optional(),
 });
 
@@ -1720,6 +1748,7 @@ export const EmotionalStateUpdateInputSchema: z.ZodType<Prisma.EmotionalStateUpd
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutEmotional_stateNestedInputSchema).optional(),
 });
 
@@ -1728,14 +1757,16 @@ export const EmotionalStateUncheckedUpdateInputSchema: z.ZodType<Prisma.Emotiona
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutEmotional_stateNestedInputSchema).optional(),
 });
 
 export const EmotionalStateCreateManyInputSchema: z.ZodType<Prisma.EmotionalStateCreateManyInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  category: z.string().optional(),
 });
 
 export const EmotionalStateUpdateManyMutationInputSchema: z.ZodType<Prisma.EmotionalStateUpdateManyMutationInput> = z.strictObject({
@@ -1743,6 +1774,7 @@ export const EmotionalStateUpdateManyMutationInputSchema: z.ZodType<Prisma.Emoti
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const EmotionalStateUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EmotionalStateUncheckedUpdateManyInput> = z.strictObject({
@@ -1750,6 +1782,7 @@ export const EmotionalStateUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Emot
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const UserAddictionCreateInputSchema: z.ZodType<Prisma.UserAddictionCreateInput> = z.strictObject({
@@ -2418,6 +2451,13 @@ export const StringFilterSchema: z.ZodType<Prisma.StringFilter> = z.strictObject
   not: z.union([ z.string(),z.lazy(() => NestedStringFilterSchema) ]).optional(),
 });
 
+export const EnumUserRoleFilterSchema: z.ZodType<Prisma.EnumUserRoleFilter> = z.strictObject({
+  equals: z.lazy(() => UserRoleSchema).optional(),
+  in: z.lazy(() => UserRoleSchema).array().optional(),
+  notIn: z.lazy(() => UserRoleSchema).array().optional(),
+  not: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => NestedEnumUserRoleFilterSchema) ]).optional(),
+});
+
 export const DateTimeFilterSchema: z.ZodType<Prisma.DateTimeFilter> = z.strictObject({
   equals: z.coerce.date().optional(),
   in: z.coerce.date().array().optional(),
@@ -2562,6 +2602,16 @@ export const StringWithAggregatesFilterSchema: z.ZodType<Prisma.StringWithAggreg
   _max: z.lazy(() => NestedStringFilterSchema).optional(),
 });
 
+export const EnumUserRoleWithAggregatesFilterSchema: z.ZodType<Prisma.EnumUserRoleWithAggregatesFilter> = z.strictObject({
+  equals: z.lazy(() => UserRoleSchema).optional(),
+  in: z.lazy(() => UserRoleSchema).array().optional(),
+  notIn: z.lazy(() => UserRoleSchema).array().optional(),
+  not: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => NestedEnumUserRoleWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumUserRoleFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumUserRoleFilterSchema).optional(),
+});
+
 export const DateTimeWithAggregatesFilterSchema: z.ZodType<Prisma.DateTimeWithAggregatesFilter> = z.strictObject({
   equals: z.coerce.date().optional(),
   in: z.coerce.date().array().optional(),
@@ -2592,6 +2642,7 @@ export const CravingLevelCountOrderByAggregateInputSchema: z.ZodType<Prisma.Crav
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  recommendation: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const CravingLevelAvgOrderByAggregateInputSchema: z.ZodType<Prisma.CravingLevelAvgOrderByAggregateInput> = z.strictObject({
@@ -2603,6 +2654,7 @@ export const CravingLevelMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Cravin
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  recommendation: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const CravingLevelMinOrderByAggregateInputSchema: z.ZodType<Prisma.CravingLevelMinOrderByAggregateInput> = z.strictObject({
@@ -2610,6 +2662,7 @@ export const CravingLevelMinOrderByAggregateInputSchema: z.ZodType<Prisma.Cravin
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  recommendation: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const CravingLevelSumOrderByAggregateInputSchema: z.ZodType<Prisma.CravingLevelSumOrderByAggregateInput> = z.strictObject({
@@ -2637,6 +2690,7 @@ export const EmotionalStateCountOrderByAggregateInputSchema: z.ZodType<Prisma.Em
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  category: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const EmotionalStateAvgOrderByAggregateInputSchema: z.ZodType<Prisma.EmotionalStateAvgOrderByAggregateInput> = z.strictObject({
@@ -2648,6 +2702,7 @@ export const EmotionalStateMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Emot
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  category: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const EmotionalStateMinOrderByAggregateInputSchema: z.ZodType<Prisma.EmotionalStateMinOrderByAggregateInput> = z.strictObject({
@@ -2655,6 +2710,7 @@ export const EmotionalStateMinOrderByAggregateInputSchema: z.ZodType<Prisma.Emot
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
   description: z.lazy(() => SortOrderSchema).optional(),
+  category: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const EmotionalStateSumOrderByAggregateInputSchema: z.ZodType<Prisma.EmotionalStateSumOrderByAggregateInput> = z.strictObject({
@@ -3169,6 +3225,10 @@ export const LogAbsenceUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodTyp
 
 export const StringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.StringFieldUpdateOperationsInput> = z.strictObject({
   set: z.string().optional(),
+});
+
+export const EnumUserRoleFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumUserRoleFieldUpdateOperationsInput> = z.strictObject({
+  set: z.lazy(() => UserRoleSchema).optional(),
 });
 
 export const DateTimeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.DateTimeFieldUpdateOperationsInput> = z.strictObject({
@@ -3892,6 +3952,13 @@ export const NestedStringFilterSchema: z.ZodType<Prisma.NestedStringFilter> = z.
   not: z.union([ z.string(),z.lazy(() => NestedStringFilterSchema) ]).optional(),
 });
 
+export const NestedEnumUserRoleFilterSchema: z.ZodType<Prisma.NestedEnumUserRoleFilter> = z.strictObject({
+  equals: z.lazy(() => UserRoleSchema).optional(),
+  in: z.lazy(() => UserRoleSchema).array().optional(),
+  notIn: z.lazy(() => UserRoleSchema).array().optional(),
+  not: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => NestedEnumUserRoleFilterSchema) ]).optional(),
+});
+
 export const NestedDateTimeFilterSchema: z.ZodType<Prisma.NestedDateTimeFilter> = z.strictObject({
   equals: z.coerce.date().optional(),
   in: z.coerce.date().array().optional(),
@@ -3943,6 +4010,16 @@ export const NestedStringWithAggregatesFilterSchema: z.ZodType<Prisma.NestedStri
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
   _min: z.lazy(() => NestedStringFilterSchema).optional(),
   _max: z.lazy(() => NestedStringFilterSchema).optional(),
+});
+
+export const NestedEnumUserRoleWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumUserRoleWithAggregatesFilter> = z.strictObject({
+  equals: z.lazy(() => UserRoleSchema).optional(),
+  in: z.lazy(() => UserRoleSchema).array().optional(),
+  notIn: z.lazy(() => UserRoleSchema).array().optional(),
+  not: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => NestedEnumUserRoleWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumUserRoleFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumUserRoleFilterSchema).optional(),
 });
 
 export const NestedDateTimeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedDateTimeWithAggregatesFilter> = z.strictObject({
@@ -4605,7 +4682,7 @@ export const UserCreateWithoutAddictionsInputSchema: z.ZodType<Prisma.UserCreate
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4622,7 +4699,7 @@ export const UserUncheckedCreateWithoutAddictionsInputSchema: z.ZodType<Prisma.U
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4715,7 +4792,7 @@ export const UserUpdateWithoutAddictionsInputSchema: z.ZodType<Prisma.UserUpdate
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -4732,7 +4809,7 @@ export const UserUncheckedUpdateWithoutAddictionsInputSchema: z.ZodType<Prisma.U
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -4781,7 +4858,7 @@ export const UserCreateWithoutSponsorships_as_sponsorInputSchema: z.ZodType<Pris
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4798,7 +4875,7 @@ export const UserUncheckedCreateWithoutSponsorships_as_sponsorInputSchema: z.Zod
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4820,7 +4897,7 @@ export const UserCreateWithoutSponsorships_as_addictInputSchema: z.ZodType<Prism
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4837,7 +4914,7 @@ export const UserUncheckedCreateWithoutSponsorships_as_addictInputSchema: z.ZodT
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4870,7 +4947,7 @@ export const UserUpdateWithoutSponsorships_as_sponsorInputSchema: z.ZodType<Pris
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -4887,7 +4964,7 @@ export const UserUncheckedUpdateWithoutSponsorships_as_sponsorInputSchema: z.Zod
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -4915,7 +4992,7 @@ export const UserUpdateWithoutSponsorships_as_addictInputSchema: z.ZodType<Prism
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -4932,7 +5009,7 @@ export const UserUncheckedUpdateWithoutSponsorships_as_addictInputSchema: z.ZodT
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -4949,7 +5026,7 @@ export const UserCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.UserCreate
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4966,7 +5043,7 @@ export const UserUncheckedCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.U
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4986,15 +5063,17 @@ export const UserCreateOrConnectWithoutDaily_logsInputSchema: z.ZodType<Prisma.U
 export const CravingLevelCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.CravingLevelCreateWithoutDaily_logsInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  recommendation: z.string().optional(),
 });
 
 export const CravingLevelUncheckedCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.CravingLevelUncheckedCreateWithoutDaily_logsInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  recommendation: z.string().optional(),
 });
 
 export const CravingLevelCreateOrConnectWithoutDaily_logsInputSchema: z.ZodType<Prisma.CravingLevelCreateOrConnectWithoutDaily_logsInput> = z.strictObject({
@@ -5005,15 +5084,17 @@ export const CravingLevelCreateOrConnectWithoutDaily_logsInputSchema: z.ZodType<
 export const EmotionalStateCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.EmotionalStateCreateWithoutDaily_logsInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  category: z.string().optional(),
 });
 
 export const EmotionalStateUncheckedCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.EmotionalStateUncheckedCreateWithoutDaily_logsInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
-  label: z.string(),
+  label: z.string().optional(),
   description: z.string().optional(),
+  category: z.string().optional(),
 });
 
 export const EmotionalStateCreateOrConnectWithoutDaily_logsInputSchema: z.ZodType<Prisma.EmotionalStateCreateOrConnectWithoutDaily_logsInput> = z.strictObject({
@@ -5037,7 +5118,7 @@ export const UserUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.UserUpdate
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -5054,7 +5135,7 @@ export const UserUncheckedUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.U
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -5082,6 +5163,7 @@ export const CravingLevelUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.Cr
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  recommendation: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const CravingLevelUncheckedUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.CravingLevelUncheckedUpdateWithoutDaily_logsInput> = z.strictObject({
@@ -5089,6 +5171,7 @@ export const CravingLevelUncheckedUpdateWithoutDaily_logsInputSchema: z.ZodType<
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  recommendation: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const EmotionalStateUpsertWithoutDaily_logsInputSchema: z.ZodType<Prisma.EmotionalStateUpsertWithoutDaily_logsInput> = z.strictObject({
@@ -5107,6 +5190,7 @@ export const EmotionalStateUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const EmotionalStateUncheckedUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.EmotionalStateUncheckedUpdateWithoutDaily_logsInput> = z.strictObject({
@@ -5114,6 +5198,7 @@ export const EmotionalStateUncheckedUpdateWithoutDaily_logsInputSchema: z.ZodTyp
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  category: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const StreakCreateWithoutEventsInputSchema: z.ZodType<Prisma.StreakCreateWithoutEventsInput> = z.strictObject({
@@ -5227,7 +5312,7 @@ export const UserCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.UserCreateWi
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
@@ -5244,7 +5329,7 @@ export const UserUncheckedCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.Use
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -5306,7 +5391,7 @@ export const UserUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.UserUpdateWi
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -5323,7 +5408,7 @@ export const UserUncheckedUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.Use
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -5375,7 +5460,7 @@ export const UserCreateWithoutContactsInputSchema: z.ZodType<Prisma.UserCreateWi
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
@@ -5392,7 +5477,7 @@ export const UserUncheckedCreateWithoutContactsInputSchema: z.ZodType<Prisma.Use
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -5425,7 +5510,7 @@ export const UserUpdateWithoutContactsInputSchema: z.ZodType<Prisma.UserUpdateWi
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -5442,7 +5527,7 @@ export const UserUncheckedUpdateWithoutContactsInputSchema: z.ZodType<Prisma.Use
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -5459,7 +5544,7 @@ export const UserCreateWithoutAlertsInputSchema: z.ZodType<Prisma.UserCreateWith
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
@@ -5476,7 +5561,7 @@ export const UserUncheckedCreateWithoutAlertsInputSchema: z.ZodType<Prisma.UserU
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -5536,7 +5621,7 @@ export const UserUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.UserUpdateWith
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -5553,7 +5638,7 @@ export const UserUncheckedUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.UserU
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -5603,7 +5688,7 @@ export const UserCreateWithoutStreakInputSchema: z.ZodType<Prisma.UserCreateWith
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
@@ -5620,7 +5705,7 @@ export const UserUncheckedCreateWithoutStreakInputSchema: z.ZodType<Prisma.UserU
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional(),
+  role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -5714,7 +5799,7 @@ export const UserUpdateWithoutStreakInputSchema: z.ZodType<Prisma.UserUpdateWith
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -5731,7 +5816,7 @@ export const UserUncheckedUpdateWithoutStreakInputSchema: z.ZodType<Prisma.UserU
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),

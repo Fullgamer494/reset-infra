@@ -13,6 +13,14 @@ datasource db {
   schemas  = ["auth", "tracking", "emergency", "core"]
 }
 
+enum UserRole {
+  ADICTO
+  PADRINO
+  ADMIN
+
+  @@schema("auth")
+}
+
 // ==========================================
 // 1. SCHEMA: AUTH
 // ==========================================
@@ -21,7 +29,7 @@ model User {
   name          String   @db.VarChar(100)
   email         String   @unique @db.VarChar(150)
   password_hash String   @db.Text
-  role          String   @default("user") @db.VarChar(20)
+  role          UserRole @default(ADICTO)
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
 
@@ -42,11 +50,12 @@ model User {
 // 2. SCHEMA: CORE
 // ==========================================
 model CravingLevel {
-  id          String     @id @default(uuid()) @db.Uuid
-  level       Int        @unique // El valor 1-10
-  label       String     @db.VarChar(50)
-  description String     @default("") @db.Text
-  daily_logs  DailyLog[]
+  id             String     @id @default(uuid()) @db.Uuid
+  level          Int        @unique // El valor 1-10
+  label          String     @default("") @db.VarChar(50)
+  description    String     @default("") @db.Text
+  recommendation String     @default("") @db.Text
+  daily_logs     DailyLog[]
 
   @@map("craving_levels")
   @@schema("core")
@@ -55,8 +64,9 @@ model CravingLevel {
 model EmotionalState {
   id          String     @id @default(uuid()) @db.Uuid
   level       Int        @unique // El valor 1-10
-  label       String     @db.VarChar(50)
+  label       String     @default("") @db.VarChar(50)
   description String     @default("") @db.Text
+  category    String     @default("") @db.VarChar(50)
   daily_logs  DailyLog[]
 
   @@map("emotional_states")
