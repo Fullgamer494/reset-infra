@@ -58,8 +58,6 @@ export const StreakScalarFieldEnumSchema = z.enum(['id','user_id','user_addictio
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
-
-export const NullsOrderSchema = z.enum(['first','last']);
 /////////////////////////////////////////
 // MODELS
 /////////////////////////////////////////
@@ -73,7 +71,7 @@ export const UserSchema = z.object({
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().nullable(),
+  role: z.string(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 })
@@ -88,7 +86,7 @@ export const CravingLevelSchema = z.object({
   id: z.uuid(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().nullable(),
+  description: z.string(),
 })
 
 export type CravingLevel = z.infer<typeof CravingLevelSchema>
@@ -101,7 +99,7 @@ export const EmotionalStateSchema = z.object({
   id: z.uuid(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().nullable(),
+  description: z.string(),
 })
 
 export type EmotionalState = z.infer<typeof EmotionalStateSchema>
@@ -114,7 +112,7 @@ export const UserAddictionSchema = z.object({
   id: z.uuid(),
   user_id: z.string(),
   custom_name: z.string(),
-  classification: z.string().nullable(),
+  classification: z.string(),
   is_active: z.boolean(),
   registered_at: z.coerce.date(),
   created_at: z.coerce.date(),
@@ -128,12 +126,12 @@ export type UserAddiction = z.infer<typeof UserAddictionSchema>
 
 export const SponsorshipSchema = z.object({
   id: z.uuid(),
-  sponsor_id: z.string().nullable(),
-  addict_id: z.string().nullable(),
+  sponsor_id: z.string(),
+  addict_id: z.string(),
   started_at: z.coerce.date(),
-  ended_at: z.coerce.date().nullable(),
+  ended_at: z.coerce.date(),
   is_active: z.boolean(),
-  termination_reason: z.string().nullable(),
+  termination_reason: z.string(),
   created_at: z.coerce.date(),
 })
 
@@ -148,10 +146,10 @@ export const DailyLogSchema = z.object({
   user_id: z.string(),
   log_date: z.coerce.date(),
   consumed: z.boolean(),
-  craving_level_id: z.string().nullable(),
-  emotional_state_id: z.string().nullable(),
-  triggers: z.string().nullable(),
-  notes: z.string().nullable(),
+  craving_level_id: z.string(),
+  emotional_state_id: z.string(),
+  triggers: z.string(),
+  notes: z.string(),
   created_at: z.coerce.date(),
 })
 
@@ -164,12 +162,12 @@ export type DailyLog = z.infer<typeof DailyLogSchema>
 export const StreakEventSchema = z.object({
   id: z.uuid(),
   streak_id: z.string(),
-  emergency_alert_id: z.string().nullable(),
-  event_type: z.string().nullable(),
+  emergency_alert_id: z.string(),
+  event_type: z.string(),
   event_date: z.coerce.date(),
-  days_achieved: z.number().int().nullable(),
-  avg_craving_period: z.instanceof(Prisma.Decimal, { message: "Field 'avg_craving_period' must be a Decimal. Location: ['Models', 'StreakEvent']"}).nullable(),
-  avg_emotion_period: z.instanceof(Prisma.Decimal, { message: "Field 'avg_emotion_period' must be a Decimal. Location: ['Models', 'StreakEvent']"}).nullable(),
+  days_achieved: z.number().int(),
+  avg_craving_period: z.instanceof(Prisma.Decimal, { message: "Field 'avg_craving_period' must be a Decimal. Location: ['Models', 'StreakEvent']"}),
+  avg_emotion_period: z.instanceof(Prisma.Decimal, { message: "Field 'avg_emotion_period' must be a Decimal. Location: ['Models', 'StreakEvent']"}),
   created_at: z.coerce.date(),
 })
 
@@ -183,11 +181,11 @@ export const LogAbsenceSchema = z.object({
   id: z.uuid(),
   user_id: z.string(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().nullable(),
+  last_log_date: z.coerce.date(),
   detected_at: z.coerce.date(),
-  absence_hours: z.number().int().nullable(),
+  absence_hours: z.number().int(),
   event_generated: z.boolean(),
-  streak_event_id: z.string().nullable(),
+  streak_event_id: z.string(),
 })
 
 export type LogAbsence = z.infer<typeof LogAbsenceSchema>
@@ -200,12 +198,12 @@ export const SupportContactSchema = z.object({
   id: z.uuid(),
   user_id: z.string(),
   contact_name: z.string(),
-  phone: z.string().nullable(),
-  email: z.string().nullable(),
-  relationship: z.string().nullable(),
-  custom_relationship: z.string().nullable(),
+  phone: z.string(),
+  email: z.string(),
+  relationship: z.string(),
+  custom_relationship: z.string(),
   is_active: z.boolean(),
-  priority_order: z.number().int().nullable(),
+  priority_order: z.number().int(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
 })
@@ -222,7 +220,7 @@ export const EmergencyAlertSchema = z.object({
   user_addiction_id: z.string(),
   activated_at: z.coerce.date(),
   resulted_in_relapse: z.boolean(),
-  resolution_notes: z.string().nullable(),
+  resolution_notes: z.string(),
   created_at: z.coerce.date(),
 })
 
@@ -236,10 +234,10 @@ export const StreakSchema = z.object({
   id: z.uuid(),
   user_id: z.string(),
   user_addiction_id: z.string(),
-  status: z.string().nullable(),
+  status: z.string(),
   started_at: z.coerce.date(),
   day_counter: z.number().int(),
-  last_log_date: z.coerce.date().nullable(),
+  last_log_date: z.coerce.date(),
   updated_at: z.coerce.date(),
 })
 
@@ -253,13 +251,13 @@ export type Streak = z.infer<typeof StreakSchema>
 //------------------------------------------------------
 
 export const UserIncludeSchema: z.ZodType<Prisma.UserInclude> = z.object({
-  addictions: z.union([z.boolean(),z.lazy(() => UserAddictionArgsSchema)]).optional(),
+  addictions: z.union([z.boolean(),z.lazy(() => UserAddictionFindManyArgsSchema)]).optional(),
   daily_logs: z.union([z.boolean(),z.lazy(() => DailyLogFindManyArgsSchema)]).optional(),
   sponsorships_as_sponsor: z.union([z.boolean(),z.lazy(() => SponsorshipFindManyArgsSchema)]).optional(),
   sponsorships_as_addict: z.union([z.boolean(),z.lazy(() => SponsorshipFindManyArgsSchema)]).optional(),
   contacts: z.union([z.boolean(),z.lazy(() => SupportContactFindManyArgsSchema)]).optional(),
   alerts: z.union([z.boolean(),z.lazy(() => EmergencyAlertFindManyArgsSchema)]).optional(),
-  streak: z.union([z.boolean(),z.lazy(() => StreakArgsSchema)]).optional(),
+  streak: z.union([z.boolean(),z.lazy(() => StreakFindManyArgsSchema)]).optional(),
   absences: z.union([z.boolean(),z.lazy(() => LogAbsenceFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict();
@@ -274,11 +272,13 @@ export const UserCountOutputTypeArgsSchema: z.ZodType<Prisma.UserCountOutputType
 }).strict();
 
 export const UserCountOutputTypeSelectSchema: z.ZodType<Prisma.UserCountOutputTypeSelect> = z.object({
+  addictions: z.boolean().optional(),
   daily_logs: z.boolean().optional(),
   sponsorships_as_sponsor: z.boolean().optional(),
   sponsorships_as_addict: z.boolean().optional(),
   contacts: z.boolean().optional(),
   alerts: z.boolean().optional(),
+  streak: z.boolean().optional(),
   absences: z.boolean().optional(),
 }).strict();
 
@@ -290,13 +290,13 @@ export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
   role: z.boolean().optional(),
   created_at: z.boolean().optional(),
   updated_at: z.boolean().optional(),
-  addictions: z.union([z.boolean(),z.lazy(() => UserAddictionArgsSchema)]).optional(),
+  addictions: z.union([z.boolean(),z.lazy(() => UserAddictionFindManyArgsSchema)]).optional(),
   daily_logs: z.union([z.boolean(),z.lazy(() => DailyLogFindManyArgsSchema)]).optional(),
   sponsorships_as_sponsor: z.union([z.boolean(),z.lazy(() => SponsorshipFindManyArgsSchema)]).optional(),
   sponsorships_as_addict: z.union([z.boolean(),z.lazy(() => SponsorshipFindManyArgsSchema)]).optional(),
   contacts: z.union([z.boolean(),z.lazy(() => SupportContactFindManyArgsSchema)]).optional(),
   alerts: z.union([z.boolean(),z.lazy(() => EmergencyAlertFindManyArgsSchema)]).optional(),
-  streak: z.union([z.boolean(),z.lazy(() => StreakArgsSchema)]).optional(),
+  streak: z.union([z.boolean(),z.lazy(() => StreakFindManyArgsSchema)]).optional(),
   absences: z.union([z.boolean(),z.lazy(() => LogAbsenceFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict()
@@ -366,7 +366,7 @@ export const EmotionalStateSelectSchema: z.ZodType<Prisma.EmotionalStateSelect> 
 
 export const UserAddictionIncludeSchema: z.ZodType<Prisma.UserAddictionInclude> = z.object({
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
-  streak: z.union([z.boolean(),z.lazy(() => StreakArgsSchema)]).optional(),
+  streak: z.union([z.boolean(),z.lazy(() => StreakFindManyArgsSchema)]).optional(),
   alerts: z.union([z.boolean(),z.lazy(() => EmergencyAlertFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserAddictionCountOutputTypeArgsSchema)]).optional(),
 }).strict();
@@ -381,6 +381,7 @@ export const UserAddictionCountOutputTypeArgsSchema: z.ZodType<Prisma.UserAddict
 }).strict();
 
 export const UserAddictionCountOutputTypeSelectSchema: z.ZodType<Prisma.UserAddictionCountOutputTypeSelect> = z.object({
+  streak: z.boolean().optional(),
   alerts: z.boolean().optional(),
 }).strict();
 
@@ -393,7 +394,7 @@ export const UserAddictionSelectSchema: z.ZodType<Prisma.UserAddictionSelect> = 
   registered_at: z.boolean().optional(),
   created_at: z.boolean().optional(),
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
-  streak: z.union([z.boolean(),z.lazy(() => StreakArgsSchema)]).optional(),
+  streak: z.union([z.boolean(),z.lazy(() => StreakFindManyArgsSchema)]).optional(),
   alerts: z.union([z.boolean(),z.lazy(() => EmergencyAlertFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserAddictionCountOutputTypeArgsSchema)]).optional(),
 }).strict()
@@ -619,16 +620,16 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.strictOb
   name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   email: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   password_hash: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  role: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  role: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  addictions: z.union([ z.lazy(() => UserAddictionNullableScalarRelationFilterSchema), z.lazy(() => UserAddictionWhereInputSchema) ]).optional().nullable(),
+  addictions: z.lazy(() => UserAddictionListRelationFilterSchema).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipListRelationFilterSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipListRelationFilterSchema).optional(),
   contacts: z.lazy(() => SupportContactListRelationFilterSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertListRelationFilterSchema).optional(),
-  streak: z.union([ z.lazy(() => StreakNullableScalarRelationFilterSchema), z.lazy(() => StreakWhereInputSchema) ]).optional().nullable(),
+  streak: z.lazy(() => StreakListRelationFilterSchema).optional(),
   absences: z.lazy(() => LogAbsenceListRelationFilterSchema).optional(),
 });
 
@@ -637,16 +638,16 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   name: z.lazy(() => SortOrderSchema).optional(),
   email: z.lazy(() => SortOrderSchema).optional(),
   password_hash: z.lazy(() => SortOrderSchema).optional(),
-  role: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  role: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
-  addictions: z.lazy(() => UserAddictionOrderByWithRelationInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionOrderByRelationAggregateInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogOrderByRelationAggregateInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipOrderByRelationAggregateInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipOrderByRelationAggregateInputSchema).optional(),
   contacts: z.lazy(() => SupportContactOrderByRelationAggregateInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertOrderByRelationAggregateInputSchema).optional(),
-  streak: z.lazy(() => StreakOrderByWithRelationInputSchema).optional(),
+  streak: z.lazy(() => StreakOrderByRelationAggregateInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceOrderByRelationAggregateInputSchema).optional(),
 });
 
@@ -670,16 +671,16 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   NOT: z.union([ z.lazy(() => UserWhereInputSchema), z.lazy(() => UserWhereInputSchema).array() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   password_hash: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  role: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  role: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  addictions: z.union([ z.lazy(() => UserAddictionNullableScalarRelationFilterSchema), z.lazy(() => UserAddictionWhereInputSchema) ]).optional().nullable(),
+  addictions: z.lazy(() => UserAddictionListRelationFilterSchema).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipListRelationFilterSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipListRelationFilterSchema).optional(),
   contacts: z.lazy(() => SupportContactListRelationFilterSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertListRelationFilterSchema).optional(),
-  streak: z.union([ z.lazy(() => StreakNullableScalarRelationFilterSchema), z.lazy(() => StreakWhereInputSchema) ]).optional().nullable(),
+  streak: z.lazy(() => StreakListRelationFilterSchema).optional(),
   absences: z.lazy(() => LogAbsenceListRelationFilterSchema).optional(),
 }));
 
@@ -688,7 +689,7 @@ export const UserOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserOrderBy
   name: z.lazy(() => SortOrderSchema).optional(),
   email: z.lazy(() => SortOrderSchema).optional(),
   password_hash: z.lazy(() => SortOrderSchema).optional(),
-  role: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  role: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => UserCountOrderByAggregateInputSchema).optional(),
@@ -704,7 +705,7 @@ export const UserScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserScal
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   email: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   password_hash: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
-  role: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  role: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
 });
@@ -716,7 +717,7 @@ export const CravingLevelWhereInputSchema: z.ZodType<Prisma.CravingLevelWhereInp
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   level: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  description: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  description: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
 });
 
@@ -724,7 +725,7 @@ export const CravingLevelOrderByWithRelationInputSchema: z.ZodType<Prisma.Cravin
   id: z.lazy(() => SortOrderSchema).optional(),
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
-  description: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  description: z.lazy(() => SortOrderSchema).optional(),
   daily_logs: z.lazy(() => DailyLogOrderByRelationAggregateInputSchema).optional(),
 });
 
@@ -747,7 +748,7 @@ export const CravingLevelWhereUniqueInputSchema: z.ZodType<Prisma.CravingLevelWh
   OR: z.lazy(() => CravingLevelWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => CravingLevelWhereInputSchema), z.lazy(() => CravingLevelWhereInputSchema).array() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  description: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  description: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
 }));
 
@@ -755,7 +756,7 @@ export const CravingLevelOrderByWithAggregationInputSchema: z.ZodType<Prisma.Cra
   id: z.lazy(() => SortOrderSchema).optional(),
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
-  description: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  description: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => CravingLevelCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => CravingLevelAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => CravingLevelMaxOrderByAggregateInputSchema).optional(),
@@ -770,7 +771,7 @@ export const CravingLevelScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.
   id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   level: z.union([ z.lazy(() => IntWithAggregatesFilterSchema), z.number() ]).optional(),
   label: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
-  description: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  description: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
 });
 
 export const EmotionalStateWhereInputSchema: z.ZodType<Prisma.EmotionalStateWhereInput> = z.strictObject({
@@ -780,7 +781,7 @@ export const EmotionalStateWhereInputSchema: z.ZodType<Prisma.EmotionalStateWher
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   level: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  description: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  description: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
 });
 
@@ -788,7 +789,7 @@ export const EmotionalStateOrderByWithRelationInputSchema: z.ZodType<Prisma.Emot
   id: z.lazy(() => SortOrderSchema).optional(),
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
-  description: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  description: z.lazy(() => SortOrderSchema).optional(),
   daily_logs: z.lazy(() => DailyLogOrderByRelationAggregateInputSchema).optional(),
 });
 
@@ -811,7 +812,7 @@ export const EmotionalStateWhereUniqueInputSchema: z.ZodType<Prisma.EmotionalSta
   OR: z.lazy(() => EmotionalStateWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => EmotionalStateWhereInputSchema), z.lazy(() => EmotionalStateWhereInputSchema).array() ]).optional(),
   label: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  description: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  description: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
 }));
 
@@ -819,7 +820,7 @@ export const EmotionalStateOrderByWithAggregationInputSchema: z.ZodType<Prisma.E
   id: z.lazy(() => SortOrderSchema).optional(),
   level: z.lazy(() => SortOrderSchema).optional(),
   label: z.lazy(() => SortOrderSchema).optional(),
-  description: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  description: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => EmotionalStateCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => EmotionalStateAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => EmotionalStateMaxOrderByAggregateInputSchema).optional(),
@@ -834,7 +835,7 @@ export const EmotionalStateScalarWhereWithAggregatesInputSchema: z.ZodType<Prism
   id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   level: z.union([ z.lazy(() => IntWithAggregatesFilterSchema), z.number() ]).optional(),
   label: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
-  description: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  description: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
 });
 
 export const UserAddictionWhereInputSchema: z.ZodType<Prisma.UserAddictionWhereInput> = z.strictObject({
@@ -844,12 +845,12 @@ export const UserAddictionWhereInputSchema: z.ZodType<Prisma.UserAddictionWhereI
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   custom_name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  classification: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  classification: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
   registered_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
-  streak: z.union([ z.lazy(() => StreakNullableScalarRelationFilterSchema), z.lazy(() => StreakWhereInputSchema) ]).optional().nullable(),
+  streak: z.lazy(() => StreakListRelationFilterSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertListRelationFilterSchema).optional(),
 });
 
@@ -857,12 +858,12 @@ export const UserAddictionOrderByWithRelationInputSchema: z.ZodType<Prisma.UserA
   id: z.lazy(() => SortOrderSchema).optional(),
   user_id: z.lazy(() => SortOrderSchema).optional(),
   custom_name: z.lazy(() => SortOrderSchema).optional(),
-  classification: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  classification: z.lazy(() => SortOrderSchema).optional(),
   is_active: z.lazy(() => SortOrderSchema).optional(),
   registered_at: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
-  streak: z.lazy(() => StreakOrderByWithRelationInputSchema).optional(),
+  streak: z.lazy(() => StreakOrderByRelationAggregateInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertOrderByRelationAggregateInputSchema).optional(),
 });
 
@@ -885,12 +886,12 @@ export const UserAddictionWhereUniqueInputSchema: z.ZodType<Prisma.UserAddiction
   OR: z.lazy(() => UserAddictionWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => UserAddictionWhereInputSchema), z.lazy(() => UserAddictionWhereInputSchema).array() ]).optional(),
   custom_name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  classification: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  classification: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
   registered_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
-  streak: z.union([ z.lazy(() => StreakNullableScalarRelationFilterSchema), z.lazy(() => StreakWhereInputSchema) ]).optional().nullable(),
+  streak: z.lazy(() => StreakListRelationFilterSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertListRelationFilterSchema).optional(),
 }));
 
@@ -898,7 +899,7 @@ export const UserAddictionOrderByWithAggregationInputSchema: z.ZodType<Prisma.Us
   id: z.lazy(() => SortOrderSchema).optional(),
   user_id: z.lazy(() => SortOrderSchema).optional(),
   custom_name: z.lazy(() => SortOrderSchema).optional(),
-  classification: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  classification: z.lazy(() => SortOrderSchema).optional(),
   is_active: z.lazy(() => SortOrderSchema).optional(),
   registered_at: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
@@ -914,7 +915,7 @@ export const UserAddictionScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma
   id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   custom_name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
-  classification: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  classification: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema), z.boolean() ]).optional(),
   registered_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
@@ -925,25 +926,25 @@ export const SponsorshipWhereInputSchema: z.ZodType<Prisma.SponsorshipWhereInput
   OR: z.lazy(() => SponsorshipWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => SponsorshipWhereInputSchema), z.lazy(() => SponsorshipWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
-  sponsor_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  addict_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
+  sponsor_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  addict_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  ended_at: z.union([ z.lazy(() => DateTimeNullableFilterSchema), z.coerce.date() ]).optional().nullable(),
+  ended_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  termination_reason: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  termination_reason: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  sponsor: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
-  addict: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
+  sponsor: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
+  addict: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
 });
 
 export const SponsorshipOrderByWithRelationInputSchema: z.ZodType<Prisma.SponsorshipOrderByWithRelationInput> = z.strictObject({
   id: z.lazy(() => SortOrderSchema).optional(),
-  sponsor_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  addict_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  sponsor_id: z.lazy(() => SortOrderSchema).optional(),
+  addict_id: z.lazy(() => SortOrderSchema).optional(),
   started_at: z.lazy(() => SortOrderSchema).optional(),
-  ended_at: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  ended_at: z.lazy(() => SortOrderSchema).optional(),
   is_active: z.lazy(() => SortOrderSchema).optional(),
-  termination_reason: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  termination_reason: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   sponsor: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   addict: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
@@ -985,22 +986,22 @@ export const SponsorshipWhereUniqueInputSchema: z.ZodType<Prisma.SponsorshipWher
   OR: z.lazy(() => SponsorshipWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => SponsorshipWhereInputSchema), z.lazy(() => SponsorshipWhereInputSchema).array() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  ended_at: z.union([ z.lazy(() => DateTimeNullableFilterSchema), z.coerce.date() ]).optional().nullable(),
+  ended_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  termination_reason: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  termination_reason: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  sponsor: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
-  addict: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
+  sponsor: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
+  addict: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
 }));
 
 export const SponsorshipOrderByWithAggregationInputSchema: z.ZodType<Prisma.SponsorshipOrderByWithAggregationInput> = z.strictObject({
   id: z.lazy(() => SortOrderSchema).optional(),
-  sponsor_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  addict_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  sponsor_id: z.lazy(() => SortOrderSchema).optional(),
+  addict_id: z.lazy(() => SortOrderSchema).optional(),
   started_at: z.lazy(() => SortOrderSchema).optional(),
-  ended_at: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  ended_at: z.lazy(() => SortOrderSchema).optional(),
   is_active: z.lazy(() => SortOrderSchema).optional(),
-  termination_reason: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  termination_reason: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => SponsorshipCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => SponsorshipMaxOrderByAggregateInputSchema).optional(),
@@ -1012,12 +1013,12 @@ export const SponsorshipScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.S
   OR: z.lazy(() => SponsorshipScalarWhereWithAggregatesInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => SponsorshipScalarWhereWithAggregatesInputSchema), z.lazy(() => SponsorshipScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
-  sponsor_id: z.union([ z.lazy(() => UuidNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
-  addict_id: z.union([ z.lazy(() => UuidNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  sponsor_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
+  addict_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
-  ended_at: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema), z.coerce.date() ]).optional().nullable(),
+  ended_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema), z.boolean() ]).optional(),
-  termination_reason: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  termination_reason: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
 });
 
@@ -1029,14 +1030,14 @@ export const DailyLogWhereInputSchema: z.ZodType<Prisma.DailyLogWhereInput> = z.
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   log_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   consumed: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  craving_level_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  emotional_state_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  triggers: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  notes: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  craving_level_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  emotional_state_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  triggers: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  notes: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
-  craving_level: z.union([ z.lazy(() => CravingLevelNullableScalarRelationFilterSchema), z.lazy(() => CravingLevelWhereInputSchema) ]).optional().nullable(),
-  emotional_state: z.union([ z.lazy(() => EmotionalStateNullableScalarRelationFilterSchema), z.lazy(() => EmotionalStateWhereInputSchema) ]).optional().nullable(),
+  craving_level: z.union([ z.lazy(() => CravingLevelScalarRelationFilterSchema), z.lazy(() => CravingLevelWhereInputSchema) ]).optional(),
+  emotional_state: z.union([ z.lazy(() => EmotionalStateScalarRelationFilterSchema), z.lazy(() => EmotionalStateWhereInputSchema) ]).optional(),
 });
 
 export const DailyLogOrderByWithRelationInputSchema: z.ZodType<Prisma.DailyLogOrderByWithRelationInput> = z.strictObject({
@@ -1044,10 +1045,10 @@ export const DailyLogOrderByWithRelationInputSchema: z.ZodType<Prisma.DailyLogOr
   user_id: z.lazy(() => SortOrderSchema).optional(),
   log_date: z.lazy(() => SortOrderSchema).optional(),
   consumed: z.lazy(() => SortOrderSchema).optional(),
-  craving_level_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  emotional_state_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  triggers: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  notes: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  craving_level_id: z.lazy(() => SortOrderSchema).optional(),
+  emotional_state_id: z.lazy(() => SortOrderSchema).optional(),
+  triggers: z.lazy(() => SortOrderSchema).optional(),
+  notes: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   craving_level: z.lazy(() => CravingLevelOrderByWithRelationInputSchema).optional(),
@@ -1075,14 +1076,14 @@ export const DailyLogWhereUniqueInputSchema: z.ZodType<Prisma.DailyLogWhereUniqu
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   log_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   consumed: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  craving_level_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  emotional_state_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  triggers: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  notes: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  craving_level_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  emotional_state_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  triggers: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  notes: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
-  craving_level: z.union([ z.lazy(() => CravingLevelNullableScalarRelationFilterSchema), z.lazy(() => CravingLevelWhereInputSchema) ]).optional().nullable(),
-  emotional_state: z.union([ z.lazy(() => EmotionalStateNullableScalarRelationFilterSchema), z.lazy(() => EmotionalStateWhereInputSchema) ]).optional().nullable(),
+  craving_level: z.union([ z.lazy(() => CravingLevelScalarRelationFilterSchema), z.lazy(() => CravingLevelWhereInputSchema) ]).optional(),
+  emotional_state: z.union([ z.lazy(() => EmotionalStateScalarRelationFilterSchema), z.lazy(() => EmotionalStateWhereInputSchema) ]).optional(),
 }));
 
 export const DailyLogOrderByWithAggregationInputSchema: z.ZodType<Prisma.DailyLogOrderByWithAggregationInput> = z.strictObject({
@@ -1090,10 +1091,10 @@ export const DailyLogOrderByWithAggregationInputSchema: z.ZodType<Prisma.DailyLo
   user_id: z.lazy(() => SortOrderSchema).optional(),
   log_date: z.lazy(() => SortOrderSchema).optional(),
   consumed: z.lazy(() => SortOrderSchema).optional(),
-  craving_level_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  emotional_state_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  triggers: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  notes: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  craving_level_id: z.lazy(() => SortOrderSchema).optional(),
+  emotional_state_id: z.lazy(() => SortOrderSchema).optional(),
+  triggers: z.lazy(() => SortOrderSchema).optional(),
+  notes: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => DailyLogCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => DailyLogMaxOrderByAggregateInputSchema).optional(),
@@ -1108,10 +1109,10 @@ export const DailyLogScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Dail
   user_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   log_date: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   consumed: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema), z.boolean() ]).optional(),
-  craving_level_id: z.union([ z.lazy(() => UuidNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
-  emotional_state_id: z.union([ z.lazy(() => UuidNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
-  triggers: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
-  notes: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  craving_level_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
+  emotional_state_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
+  triggers: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
+  notes: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
 });
 
@@ -1121,12 +1122,12 @@ export const StreakEventWhereInputSchema: z.ZodType<Prisma.StreakEventWhereInput
   NOT: z.union([ z.lazy(() => StreakEventWhereInputSchema), z.lazy(() => StreakEventWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   streak_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
-  emergency_alert_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  event_type: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  event_type: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   event_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  days_achieved: z.union([ z.lazy(() => IntNullableFilterSchema), z.number() ]).optional().nullable(),
-  avg_craving_period: z.union([ z.lazy(() => DecimalNullableFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.lazy(() => DecimalNullableFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
+  days_achieved: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
+  avg_craving_period: z.union([ z.lazy(() => DecimalFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
+  avg_emotion_period: z.union([ z.lazy(() => DecimalFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   streak: z.union([ z.lazy(() => StreakScalarRelationFilterSchema), z.lazy(() => StreakWhereInputSchema) ]).optional(),
   absences: z.lazy(() => LogAbsenceListRelationFilterSchema).optional(),
@@ -1135,12 +1136,12 @@ export const StreakEventWhereInputSchema: z.ZodType<Prisma.StreakEventWhereInput
 export const StreakEventOrderByWithRelationInputSchema: z.ZodType<Prisma.StreakEventOrderByWithRelationInput> = z.strictObject({
   id: z.lazy(() => SortOrderSchema).optional(),
   streak_id: z.lazy(() => SortOrderSchema).optional(),
-  emergency_alert_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  event_type: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  emergency_alert_id: z.lazy(() => SortOrderSchema).optional(),
+  event_type: z.lazy(() => SortOrderSchema).optional(),
   event_date: z.lazy(() => SortOrderSchema).optional(),
-  days_achieved: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  avg_craving_period: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  avg_emotion_period: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  days_achieved: z.lazy(() => SortOrderSchema).optional(),
+  avg_craving_period: z.lazy(() => SortOrderSchema).optional(),
+  avg_emotion_period: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   streak: z.lazy(() => StreakOrderByWithRelationInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceOrderByRelationAggregateInputSchema).optional(),
@@ -1155,12 +1156,12 @@ export const StreakEventWhereUniqueInputSchema: z.ZodType<Prisma.StreakEventWher
   OR: z.lazy(() => StreakEventWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => StreakEventWhereInputSchema), z.lazy(() => StreakEventWhereInputSchema).array() ]).optional(),
   streak_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
-  emergency_alert_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  event_type: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  event_type: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   event_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  days_achieved: z.union([ z.lazy(() => IntNullableFilterSchema), z.number().int() ]).optional().nullable(),
-  avg_craving_period: z.union([ z.lazy(() => DecimalNullableFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.lazy(() => DecimalNullableFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
+  days_achieved: z.union([ z.lazy(() => IntFilterSchema), z.number().int() ]).optional(),
+  avg_craving_period: z.union([ z.lazy(() => DecimalFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
+  avg_emotion_period: z.union([ z.lazy(() => DecimalFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   streak: z.union([ z.lazy(() => StreakScalarRelationFilterSchema), z.lazy(() => StreakWhereInputSchema) ]).optional(),
   absences: z.lazy(() => LogAbsenceListRelationFilterSchema).optional(),
@@ -1169,12 +1170,12 @@ export const StreakEventWhereUniqueInputSchema: z.ZodType<Prisma.StreakEventWher
 export const StreakEventOrderByWithAggregationInputSchema: z.ZodType<Prisma.StreakEventOrderByWithAggregationInput> = z.strictObject({
   id: z.lazy(() => SortOrderSchema).optional(),
   streak_id: z.lazy(() => SortOrderSchema).optional(),
-  emergency_alert_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  event_type: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  emergency_alert_id: z.lazy(() => SortOrderSchema).optional(),
+  event_type: z.lazy(() => SortOrderSchema).optional(),
   event_date: z.lazy(() => SortOrderSchema).optional(),
-  days_achieved: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  avg_craving_period: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  avg_emotion_period: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  days_achieved: z.lazy(() => SortOrderSchema).optional(),
+  avg_craving_period: z.lazy(() => SortOrderSchema).optional(),
+  avg_emotion_period: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => StreakEventCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => StreakEventAvgOrderByAggregateInputSchema).optional(),
@@ -1189,12 +1190,12 @@ export const StreakEventScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.S
   NOT: z.union([ z.lazy(() => StreakEventScalarWhereWithAggregatesInputSchema), z.lazy(() => StreakEventScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   streak_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
-  emergency_alert_id: z.union([ z.lazy(() => UuidNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
-  event_type: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
+  event_type: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   event_date: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
-  days_achieved: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema), z.number() ]).optional().nullable(),
-  avg_craving_period: z.union([ z.lazy(() => DecimalNullableWithAggregatesFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.lazy(() => DecimalNullableWithAggregatesFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
+  days_achieved: z.union([ z.lazy(() => IntWithAggregatesFilterSchema), z.number() ]).optional(),
+  avg_craving_period: z.union([ z.lazy(() => DecimalWithAggregatesFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
+  avg_emotion_period: z.union([ z.lazy(() => DecimalWithAggregatesFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
 });
 
@@ -1205,24 +1206,24 @@ export const LogAbsenceWhereInputSchema: z.ZodType<Prisma.LogAbsenceWhereInput> 
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   streak_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
-  last_log_date: z.union([ z.lazy(() => DateTimeNullableFilterSchema), z.coerce.date() ]).optional().nullable(),
+  last_log_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   detected_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  absence_hours: z.union([ z.lazy(() => IntNullableFilterSchema), z.number() ]).optional().nullable(),
+  absence_hours: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
   event_generated: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  streak_event_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
+  streak_event_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
-  streak_event: z.union([ z.lazy(() => StreakEventNullableScalarRelationFilterSchema), z.lazy(() => StreakEventWhereInputSchema) ]).optional().nullable(),
+  streak_event: z.union([ z.lazy(() => StreakEventScalarRelationFilterSchema), z.lazy(() => StreakEventWhereInputSchema) ]).optional(),
 });
 
 export const LogAbsenceOrderByWithRelationInputSchema: z.ZodType<Prisma.LogAbsenceOrderByWithRelationInput> = z.strictObject({
   id: z.lazy(() => SortOrderSchema).optional(),
   user_id: z.lazy(() => SortOrderSchema).optional(),
   streak_id: z.lazy(() => SortOrderSchema).optional(),
-  last_log_date: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  last_log_date: z.lazy(() => SortOrderSchema).optional(),
   detected_at: z.lazy(() => SortOrderSchema).optional(),
-  absence_hours: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  absence_hours: z.lazy(() => SortOrderSchema).optional(),
   event_generated: z.lazy(() => SortOrderSchema).optional(),
-  streak_event_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  streak_event_id: z.lazy(() => SortOrderSchema).optional(),
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   streak_event: z.lazy(() => StreakEventOrderByWithRelationInputSchema).optional(),
 });
@@ -1237,24 +1238,24 @@ export const LogAbsenceWhereUniqueInputSchema: z.ZodType<Prisma.LogAbsenceWhereU
   NOT: z.union([ z.lazy(() => LogAbsenceWhereInputSchema), z.lazy(() => LogAbsenceWhereInputSchema).array() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   streak_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
-  last_log_date: z.union([ z.lazy(() => DateTimeNullableFilterSchema), z.coerce.date() ]).optional().nullable(),
+  last_log_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   detected_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  absence_hours: z.union([ z.lazy(() => IntNullableFilterSchema), z.number().int() ]).optional().nullable(),
+  absence_hours: z.union([ z.lazy(() => IntFilterSchema), z.number().int() ]).optional(),
   event_generated: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  streak_event_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
+  streak_event_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
-  streak_event: z.union([ z.lazy(() => StreakEventNullableScalarRelationFilterSchema), z.lazy(() => StreakEventWhereInputSchema) ]).optional().nullable(),
+  streak_event: z.union([ z.lazy(() => StreakEventScalarRelationFilterSchema), z.lazy(() => StreakEventWhereInputSchema) ]).optional(),
 }));
 
 export const LogAbsenceOrderByWithAggregationInputSchema: z.ZodType<Prisma.LogAbsenceOrderByWithAggregationInput> = z.strictObject({
   id: z.lazy(() => SortOrderSchema).optional(),
   user_id: z.lazy(() => SortOrderSchema).optional(),
   streak_id: z.lazy(() => SortOrderSchema).optional(),
-  last_log_date: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  last_log_date: z.lazy(() => SortOrderSchema).optional(),
   detected_at: z.lazy(() => SortOrderSchema).optional(),
-  absence_hours: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  absence_hours: z.lazy(() => SortOrderSchema).optional(),
   event_generated: z.lazy(() => SortOrderSchema).optional(),
-  streak_event_id: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  streak_event_id: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => LogAbsenceCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => LogAbsenceAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => LogAbsenceMaxOrderByAggregateInputSchema).optional(),
@@ -1269,11 +1270,11 @@ export const LogAbsenceScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Lo
   id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   streak_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
-  last_log_date: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema), z.coerce.date() ]).optional().nullable(),
+  last_log_date: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   detected_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
-  absence_hours: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema), z.number() ]).optional().nullable(),
+  absence_hours: z.union([ z.lazy(() => IntWithAggregatesFilterSchema), z.number() ]).optional(),
   event_generated: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema), z.boolean() ]).optional(),
-  streak_event_id: z.union([ z.lazy(() => UuidNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  streak_event_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
 });
 
 export const SupportContactWhereInputSchema: z.ZodType<Prisma.SupportContactWhereInput> = z.strictObject({
@@ -1283,12 +1284,12 @@ export const SupportContactWhereInputSchema: z.ZodType<Prisma.SupportContactWher
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   contact_name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  phone: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  email: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  relationship: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  custom_relationship: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  phone: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  email: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  relationship: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  custom_relationship: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  priority_order: z.union([ z.lazy(() => IntNullableFilterSchema), z.number() ]).optional().nullable(),
+  priority_order: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
@@ -1298,12 +1299,12 @@ export const SupportContactOrderByWithRelationInputSchema: z.ZodType<Prisma.Supp
   id: z.lazy(() => SortOrderSchema).optional(),
   user_id: z.lazy(() => SortOrderSchema).optional(),
   contact_name: z.lazy(() => SortOrderSchema).optional(),
-  phone: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  email: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  relationship: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  custom_relationship: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  phone: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
+  relationship: z.lazy(() => SortOrderSchema).optional(),
+  custom_relationship: z.lazy(() => SortOrderSchema).optional(),
   is_active: z.lazy(() => SortOrderSchema).optional(),
-  priority_order: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  priority_order: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
@@ -1319,12 +1320,12 @@ export const SupportContactWhereUniqueInputSchema: z.ZodType<Prisma.SupportConta
   NOT: z.union([ z.lazy(() => SupportContactWhereInputSchema), z.lazy(() => SupportContactWhereInputSchema).array() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   contact_name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  phone: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  email: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  relationship: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  custom_relationship: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  phone: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  email: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  relationship: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  custom_relationship: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  priority_order: z.union([ z.lazy(() => IntNullableFilterSchema), z.number().int() ]).optional().nullable(),
+  priority_order: z.union([ z.lazy(() => IntFilterSchema), z.number().int() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
@@ -1334,12 +1335,12 @@ export const SupportContactOrderByWithAggregationInputSchema: z.ZodType<Prisma.S
   id: z.lazy(() => SortOrderSchema).optional(),
   user_id: z.lazy(() => SortOrderSchema).optional(),
   contact_name: z.lazy(() => SortOrderSchema).optional(),
-  phone: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  email: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  relationship: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
-  custom_relationship: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  phone: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
+  relationship: z.lazy(() => SortOrderSchema).optional(),
+  custom_relationship: z.lazy(() => SortOrderSchema).optional(),
   is_active: z.lazy(() => SortOrderSchema).optional(),
-  priority_order: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  priority_order: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => SupportContactCountOrderByAggregateInputSchema).optional(),
@@ -1356,12 +1357,12 @@ export const SupportContactScalarWhereWithAggregatesInputSchema: z.ZodType<Prism
   id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   contact_name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
-  phone: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
-  email: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
-  relationship: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
-  custom_relationship: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  phone: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
+  email: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
+  relationship: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
+  custom_relationship: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema), z.boolean() ]).optional(),
-  priority_order: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema), z.number() ]).optional().nullable(),
+  priority_order: z.union([ z.lazy(() => IntWithAggregatesFilterSchema), z.number() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
 });
@@ -1375,7 +1376,7 @@ export const EmergencyAlertWhereInputSchema: z.ZodType<Prisma.EmergencyAlertWher
   user_addiction_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   activated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   resulted_in_relapse: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  resolution_notes: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  resolution_notes: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
   addiction: z.union([ z.lazy(() => UserAddictionScalarRelationFilterSchema), z.lazy(() => UserAddictionWhereInputSchema) ]).optional(),
@@ -1387,7 +1388,7 @@ export const EmergencyAlertOrderByWithRelationInputSchema: z.ZodType<Prisma.Emer
   user_addiction_id: z.lazy(() => SortOrderSchema).optional(),
   activated_at: z.lazy(() => SortOrderSchema).optional(),
   resulted_in_relapse: z.lazy(() => SortOrderSchema).optional(),
-  resolution_notes: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  resolution_notes: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   addiction: z.lazy(() => UserAddictionOrderByWithRelationInputSchema).optional(),
@@ -1405,7 +1406,7 @@ export const EmergencyAlertWhereUniqueInputSchema: z.ZodType<Prisma.EmergencyAle
   user_addiction_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   activated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   resulted_in_relapse: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  resolution_notes: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  resolution_notes: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
   addiction: z.union([ z.lazy(() => UserAddictionScalarRelationFilterSchema), z.lazy(() => UserAddictionWhereInputSchema) ]).optional(),
@@ -1417,7 +1418,7 @@ export const EmergencyAlertOrderByWithAggregationInputSchema: z.ZodType<Prisma.E
   user_addiction_id: z.lazy(() => SortOrderSchema).optional(),
   activated_at: z.lazy(() => SortOrderSchema).optional(),
   resulted_in_relapse: z.lazy(() => SortOrderSchema).optional(),
-  resolution_notes: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  resolution_notes: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => EmergencyAlertCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => EmergencyAlertMaxOrderByAggregateInputSchema).optional(),
@@ -1433,7 +1434,7 @@ export const EmergencyAlertScalarWhereWithAggregatesInputSchema: z.ZodType<Prism
   user_addiction_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   activated_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   resulted_in_relapse: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema), z.boolean() ]).optional(),
-  resolution_notes: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  resolution_notes: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
 });
 
@@ -1444,10 +1445,10 @@ export const StreakWhereInputSchema: z.ZodType<Prisma.StreakWhereInput> = z.stri
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   user_addiction_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
-  status: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   day_counter: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
-  last_log_date: z.union([ z.lazy(() => DateTimeNullableFilterSchema), z.coerce.date() ]).optional().nullable(),
+  last_log_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
   addiction: z.union([ z.lazy(() => UserAddictionScalarRelationFilterSchema), z.lazy(() => UserAddictionWhereInputSchema) ]).optional(),
@@ -1458,10 +1459,10 @@ export const StreakOrderByWithRelationInputSchema: z.ZodType<Prisma.StreakOrderB
   id: z.lazy(() => SortOrderSchema).optional(),
   user_id: z.lazy(() => SortOrderSchema).optional(),
   user_addiction_id: z.lazy(() => SortOrderSchema).optional(),
-  status: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
   started_at: z.lazy(() => SortOrderSchema).optional(),
   day_counter: z.lazy(() => SortOrderSchema).optional(),
-  last_log_date: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  last_log_date: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
   addiction: z.lazy(() => UserAddictionOrderByWithRelationInputSchema).optional(),
@@ -1503,10 +1504,10 @@ export const StreakWhereUniqueInputSchema: z.ZodType<Prisma.StreakWhereUniqueInp
   AND: z.union([ z.lazy(() => StreakWhereInputSchema), z.lazy(() => StreakWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => StreakWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => StreakWhereInputSchema), z.lazy(() => StreakWhereInputSchema).array() ]).optional(),
-  status: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   day_counter: z.union([ z.lazy(() => IntFilterSchema), z.number().int() ]).optional(),
-  last_log_date: z.union([ z.lazy(() => DateTimeNullableFilterSchema), z.coerce.date() ]).optional().nullable(),
+  last_log_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   user: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
   addiction: z.union([ z.lazy(() => UserAddictionScalarRelationFilterSchema), z.lazy(() => UserAddictionWhereInputSchema) ]).optional(),
@@ -1517,10 +1518,10 @@ export const StreakOrderByWithAggregationInputSchema: z.ZodType<Prisma.StreakOrd
   id: z.lazy(() => SortOrderSchema).optional(),
   user_id: z.lazy(() => SortOrderSchema).optional(),
   user_addiction_id: z.lazy(() => SortOrderSchema).optional(),
-  status: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
   started_at: z.lazy(() => SortOrderSchema).optional(),
   day_counter: z.lazy(() => SortOrderSchema).optional(),
-  last_log_date: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
+  last_log_date: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => StreakCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => StreakAvgOrderByAggregateInputSchema).optional(),
@@ -1536,10 +1537,10 @@ export const StreakScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Streak
   id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   user_addiction_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
-  status: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   day_counter: z.union([ z.lazy(() => IntWithAggregatesFilterSchema), z.number() ]).optional(),
-  last_log_date: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema), z.coerce.date() ]).optional().nullable(),
+  last_log_date: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
 });
 
@@ -1548,16 +1549,16 @@ export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.strict
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -1566,16 +1567,16 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreat
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -1584,16 +1585,16 @@ export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.strict
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -1602,16 +1603,16 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -1620,7 +1621,7 @@ export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> = 
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
 });
@@ -1630,7 +1631,7 @@ export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyM
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -1640,7 +1641,7 @@ export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedU
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -1649,7 +1650,7 @@ export const CravingLevelCreateInputSchema: z.ZodType<Prisma.CravingLevelCreateI
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutCraving_levelInputSchema).optional(),
 });
 
@@ -1657,7 +1658,7 @@ export const CravingLevelUncheckedCreateInputSchema: z.ZodType<Prisma.CravingLev
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutCraving_levelInputSchema).optional(),
 });
 
@@ -1665,7 +1666,7 @@ export const CravingLevelUpdateInputSchema: z.ZodType<Prisma.CravingLevelUpdateI
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutCraving_levelNestedInputSchema).optional(),
 });
 
@@ -1673,7 +1674,7 @@ export const CravingLevelUncheckedUpdateInputSchema: z.ZodType<Prisma.CravingLev
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutCraving_levelNestedInputSchema).optional(),
 });
 
@@ -1681,28 +1682,28 @@ export const CravingLevelCreateManyInputSchema: z.ZodType<Prisma.CravingLevelCre
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
 });
 
 export const CravingLevelUpdateManyMutationInputSchema: z.ZodType<Prisma.CravingLevelUpdateManyMutationInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const CravingLevelUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CravingLevelUncheckedUpdateManyInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const EmotionalStateCreateInputSchema: z.ZodType<Prisma.EmotionalStateCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutEmotional_stateInputSchema).optional(),
 });
 
@@ -1710,7 +1711,7 @@ export const EmotionalStateUncheckedCreateInputSchema: z.ZodType<Prisma.Emotiona
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutEmotional_stateInputSchema).optional(),
 });
 
@@ -1718,7 +1719,7 @@ export const EmotionalStateUpdateInputSchema: z.ZodType<Prisma.EmotionalStateUpd
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutEmotional_stateNestedInputSchema).optional(),
 });
 
@@ -1726,7 +1727,7 @@ export const EmotionalStateUncheckedUpdateInputSchema: z.ZodType<Prisma.Emotiona
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutEmotional_stateNestedInputSchema).optional(),
 });
 
@@ -1734,32 +1735,32 @@ export const EmotionalStateCreateManyInputSchema: z.ZodType<Prisma.EmotionalStat
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
 });
 
 export const EmotionalStateUpdateManyMutationInputSchema: z.ZodType<Prisma.EmotionalStateUpdateManyMutationInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const EmotionalStateUncheckedUpdateManyInputSchema: z.ZodType<Prisma.EmotionalStateUncheckedUpdateManyInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const UserAddictionCreateInputSchema: z.ZodType<Prisma.UserAddictionCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   custom_name: z.string(),
-  classification: z.string().optional().nullable(),
+  classification: z.string().optional(),
   is_active: z.boolean().optional(),
   registered_at: z.coerce.date().optional(),
   created_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutAddictionsInputSchema),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutAddictionInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutAddictionInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertCreateNestedManyWithoutAddictionInputSchema).optional(),
 });
 
@@ -1767,23 +1768,23 @@ export const UserAddictionUncheckedCreateInputSchema: z.ZodType<Prisma.UserAddic
   id: z.uuid().optional(),
   user_id: z.string(),
   custom_name: z.string(),
-  classification: z.string().optional().nullable(),
+  classification: z.string().optional(),
   is_active: z.boolean().optional(),
   registered_at: z.coerce.date().optional(),
   created_at: z.coerce.date().optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutAddictionInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutAddictionInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedCreateNestedManyWithoutAddictionInputSchema).optional(),
 });
 
 export const UserAddictionUpdateInputSchema: z.ZodType<Prisma.UserAddictionUpdateInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutAddictionsNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutAddictionNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutAddictionNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutAddictionNestedInputSchema).optional(),
 });
 
@@ -1791,11 +1792,11 @@ export const UserAddictionUncheckedUpdateInputSchema: z.ZodType<Prisma.UserAddic
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutAddictionNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutAddictionNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutAddictionNestedInputSchema).optional(),
 });
 
@@ -1803,7 +1804,7 @@ export const UserAddictionCreateManyInputSchema: z.ZodType<Prisma.UserAddictionC
   id: z.uuid().optional(),
   user_id: z.string(),
   custom_name: z.string(),
-  classification: z.string().optional().nullable(),
+  classification: z.string().optional(),
   is_active: z.boolean().optional(),
   registered_at: z.coerce.date().optional(),
   created_at: z.coerce.date().optional(),
@@ -1812,7 +1813,7 @@ export const UserAddictionCreateManyInputSchema: z.ZodType<Prisma.UserAddictionC
 export const UserAddictionUpdateManyMutationInputSchema: z.ZodType<Prisma.UserAddictionUpdateManyMutationInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1822,7 +1823,7 @@ export const UserAddictionUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserA
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -1831,9 +1832,9 @@ export const UserAddictionUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserA
 export const SponsorshipCreateInputSchema: z.ZodType<Prisma.SponsorshipCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   started_at: z.coerce.date().optional(),
-  ended_at: z.coerce.date().optional().nullable(),
+  ended_at: z.coerce.date().optional(),
   is_active: z.boolean().optional(),
-  termination_reason: z.string().optional().nullable(),
+  termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
   sponsor: z.lazy(() => UserCreateNestedOneWithoutSponsorships_as_sponsorInputSchema).optional(),
   addict: z.lazy(() => UserCreateNestedOneWithoutSponsorships_as_addictInputSchema).optional(),
@@ -1841,65 +1842,65 @@ export const SponsorshipCreateInputSchema: z.ZodType<Prisma.SponsorshipCreateInp
 
 export const SponsorshipUncheckedCreateInputSchema: z.ZodType<Prisma.SponsorshipUncheckedCreateInput> = z.strictObject({
   id: z.uuid().optional(),
-  sponsor_id: z.string().optional().nullable(),
-  addict_id: z.string().optional().nullable(),
+  sponsor_id: z.string().optional(),
+  addict_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
-  ended_at: z.coerce.date().optional().nullable(),
+  ended_at: z.coerce.date().optional(),
   is_active: z.boolean().optional(),
-  termination_reason: z.string().optional().nullable(),
+  termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
 export const SponsorshipUpdateInputSchema: z.ZodType<Prisma.SponsorshipUpdateInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  sponsor: z.lazy(() => UserUpdateOneWithoutSponsorships_as_sponsorNestedInputSchema).optional(),
-  addict: z.lazy(() => UserUpdateOneWithoutSponsorships_as_addictNestedInputSchema).optional(),
+  sponsor: z.lazy(() => UserUpdateOneRequiredWithoutSponsorships_as_sponsorNestedInputSchema).optional(),
+  addict: z.lazy(() => UserUpdateOneRequiredWithoutSponsorships_as_addictNestedInputSchema).optional(),
 });
 
 export const SponsorshipUncheckedUpdateInputSchema: z.ZodType<Prisma.SponsorshipUncheckedUpdateInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  sponsor_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  addict_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  sponsor_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  addict_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const SponsorshipCreateManyInputSchema: z.ZodType<Prisma.SponsorshipCreateManyInput> = z.strictObject({
   id: z.uuid().optional(),
-  sponsor_id: z.string().optional().nullable(),
-  addict_id: z.string().optional().nullable(),
+  sponsor_id: z.string().optional(),
+  addict_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
-  ended_at: z.coerce.date().optional().nullable(),
+  ended_at: z.coerce.date().optional(),
   is_active: z.boolean().optional(),
-  termination_reason: z.string().optional().nullable(),
+  termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
 export const SponsorshipUpdateManyMutationInputSchema: z.ZodType<Prisma.SponsorshipUpdateManyMutationInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const SponsorshipUncheckedUpdateManyInputSchema: z.ZodType<Prisma.SponsorshipUncheckedUpdateManyInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  sponsor_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  addict_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  sponsor_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  addict_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -1907,8 +1908,8 @@ export const DailyLogCreateInputSchema: z.ZodType<Prisma.DailyLogCreateInput> = 
   id: z.uuid().optional(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutDaily_logsInputSchema),
   craving_level: z.lazy(() => CravingLevelCreateNestedOneWithoutDaily_logsInputSchema).optional(),
@@ -1920,10 +1921,10 @@ export const DailyLogUncheckedCreateInputSchema: z.ZodType<Prisma.DailyLogUnchec
   user_id: z.string(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  craving_level_id: z.string().optional().nullable(),
-  emotional_state_id: z.string().optional().nullable(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  craving_level_id: z.string().optional(),
+  emotional_state_id: z.string().optional(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -1931,12 +1932,12 @@ export const DailyLogUpdateInputSchema: z.ZodType<Prisma.DailyLogUpdateInput> = 
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutDaily_logsNestedInputSchema).optional(),
-  craving_level: z.lazy(() => CravingLevelUpdateOneWithoutDaily_logsNestedInputSchema).optional(),
-  emotional_state: z.lazy(() => EmotionalStateUpdateOneWithoutDaily_logsNestedInputSchema).optional(),
+  craving_level: z.lazy(() => CravingLevelUpdateOneRequiredWithoutDaily_logsNestedInputSchema).optional(),
+  emotional_state: z.lazy(() => EmotionalStateUpdateOneRequiredWithoutDaily_logsNestedInputSchema).optional(),
 });
 
 export const DailyLogUncheckedUpdateInputSchema: z.ZodType<Prisma.DailyLogUncheckedUpdateInput> = z.strictObject({
@@ -1944,10 +1945,10 @@ export const DailyLogUncheckedUpdateInputSchema: z.ZodType<Prisma.DailyLogUnchec
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  craving_level_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  emotional_state_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  craving_level_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  emotional_state_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -1956,10 +1957,10 @@ export const DailyLogCreateManyInputSchema: z.ZodType<Prisma.DailyLogCreateManyI
   user_id: z.string(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  craving_level_id: z.string().optional().nullable(),
-  emotional_state_id: z.string().optional().nullable(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  craving_level_id: z.string().optional(),
+  emotional_state_id: z.string().optional(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -1967,8 +1968,8 @@ export const DailyLogUpdateManyMutationInputSchema: z.ZodType<Prisma.DailyLogUpd
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -1977,21 +1978,21 @@ export const DailyLogUncheckedUpdateManyInputSchema: z.ZodType<Prisma.DailyLogUn
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  craving_level_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  emotional_state_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  craving_level_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  emotional_state_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const StreakEventCreateInputSchema: z.ZodType<Prisma.StreakEventCreateInput> = z.strictObject({
   id: z.uuid().optional(),
-  emergency_alert_id: z.string().optional().nullable(),
-  event_type: z.string().optional().nullable(),
+  emergency_alert_id: z.string().optional(),
+  event_type: z.string().optional(),
   event_date: z.coerce.date(),
-  days_achieved: z.number().int().optional().nullable(),
-  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
+  days_achieved: z.number().int().optional(),
+  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   created_at: z.coerce.date().optional(),
   streak: z.lazy(() => StreakCreateNestedOneWithoutEventsInputSchema),
   absences: z.lazy(() => LogAbsenceCreateNestedManyWithoutStreak_eventInputSchema).optional(),
@@ -2000,24 +2001,24 @@ export const StreakEventCreateInputSchema: z.ZodType<Prisma.StreakEventCreateInp
 export const StreakEventUncheckedCreateInputSchema: z.ZodType<Prisma.StreakEventUncheckedCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   streak_id: z.string(),
-  emergency_alert_id: z.string().optional().nullable(),
-  event_type: z.string().optional().nullable(),
+  emergency_alert_id: z.string().optional(),
+  event_type: z.string().optional(),
   event_date: z.coerce.date(),
-  days_achieved: z.number().int().optional().nullable(),
-  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
+  days_achieved: z.number().int().optional(),
+  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   created_at: z.coerce.date().optional(),
   absences: z.lazy(() => LogAbsenceUncheckedCreateNestedManyWithoutStreak_eventInputSchema).optional(),
 });
 
 export const StreakEventUpdateInputSchema: z.ZodType<Prisma.StreakEventUpdateInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emergency_alert_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  event_type: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  event_type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   event_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  days_achieved: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  days_achieved: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   streak: z.lazy(() => StreakUpdateOneRequiredWithoutEventsNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUpdateManyWithoutStreak_eventNestedInputSchema).optional(),
@@ -2026,12 +2027,12 @@ export const StreakEventUpdateInputSchema: z.ZodType<Prisma.StreakEventUpdateInp
 export const StreakEventUncheckedUpdateInputSchema: z.ZodType<Prisma.StreakEventUncheckedUpdateInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emergency_alert_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  event_type: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  event_type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   event_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  days_achieved: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  days_achieved: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedUpdateManyWithoutStreak_eventNestedInputSchema).optional(),
 });
@@ -2039,44 +2040,44 @@ export const StreakEventUncheckedUpdateInputSchema: z.ZodType<Prisma.StreakEvent
 export const StreakEventCreateManyInputSchema: z.ZodType<Prisma.StreakEventCreateManyInput> = z.strictObject({
   id: z.uuid().optional(),
   streak_id: z.string(),
-  emergency_alert_id: z.string().optional().nullable(),
-  event_type: z.string().optional().nullable(),
+  emergency_alert_id: z.string().optional(),
+  event_type: z.string().optional(),
   event_date: z.coerce.date(),
-  days_achieved: z.number().int().optional().nullable(),
-  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
+  days_achieved: z.number().int().optional(),
+  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   created_at: z.coerce.date().optional(),
 });
 
 export const StreakEventUpdateManyMutationInputSchema: z.ZodType<Prisma.StreakEventUpdateManyMutationInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emergency_alert_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  event_type: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  event_type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   event_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  days_achieved: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  days_achieved: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const StreakEventUncheckedUpdateManyInputSchema: z.ZodType<Prisma.StreakEventUncheckedUpdateManyInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emergency_alert_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  event_type: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  event_type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   event_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  days_achieved: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  days_achieved: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const LogAbsenceCreateInputSchema: z.ZodType<Prisma.LogAbsenceCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   detected_at: z.coerce.date().optional(),
-  absence_hours: z.number().int().optional().nullable(),
+  absence_hours: z.number().int().optional(),
   event_generated: z.boolean().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutAbsencesInputSchema),
   streak_event: z.lazy(() => StreakEventCreateNestedOneWithoutAbsencesInputSchema).optional(),
@@ -2086,52 +2087,52 @@ export const LogAbsenceUncheckedCreateInputSchema: z.ZodType<Prisma.LogAbsenceUn
   id: z.uuid().optional(),
   user_id: z.string(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   detected_at: z.coerce.date().optional(),
-  absence_hours: z.number().int().optional().nullable(),
+  absence_hours: z.number().int().optional(),
   event_generated: z.boolean().optional(),
-  streak_event_id: z.string().optional().nullable(),
+  streak_event_id: z.string().optional(),
 });
 
 export const LogAbsenceUpdateInputSchema: z.ZodType<Prisma.LogAbsenceUpdateInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutAbsencesNestedInputSchema).optional(),
-  streak_event: z.lazy(() => StreakEventUpdateOneWithoutAbsencesNestedInputSchema).optional(),
+  streak_event: z.lazy(() => StreakEventUpdateOneRequiredWithoutAbsencesNestedInputSchema).optional(),
 });
 
 export const LogAbsenceUncheckedUpdateInputSchema: z.ZodType<Prisma.LogAbsenceUncheckedUpdateInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  streak_event_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  streak_event_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const LogAbsenceCreateManyInputSchema: z.ZodType<Prisma.LogAbsenceCreateManyInput> = z.strictObject({
   id: z.uuid().optional(),
   user_id: z.string(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   detected_at: z.coerce.date().optional(),
-  absence_hours: z.number().int().optional().nullable(),
+  absence_hours: z.number().int().optional(),
   event_generated: z.boolean().optional(),
-  streak_event_id: z.string().optional().nullable(),
+  streak_event_id: z.string().optional(),
 });
 
 export const LogAbsenceUpdateManyMutationInputSchema: z.ZodType<Prisma.LogAbsenceUpdateManyMutationInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -2139,22 +2140,22 @@ export const LogAbsenceUncheckedUpdateManyInputSchema: z.ZodType<Prisma.LogAbsen
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  streak_event_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  streak_event_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const SupportContactCreateInputSchema: z.ZodType<Prisma.SupportContactCreateInput> = z.strictObject({
   id: z.uuid().optional(),
   contact_name: z.string(),
-  phone: z.string().optional().nullable(),
-  email: z.string().optional().nullable(),
-  relationship: z.string().optional().nullable(),
-  custom_relationship: z.string().optional().nullable(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  relationship: z.string().optional(),
+  custom_relationship: z.string().optional(),
   is_active: z.boolean().optional(),
-  priority_order: z.number().int().optional().nullable(),
+  priority_order: z.number().int().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutContactsInputSchema),
@@ -2164,12 +2165,12 @@ export const SupportContactUncheckedCreateInputSchema: z.ZodType<Prisma.SupportC
   id: z.uuid().optional(),
   user_id: z.string(),
   contact_name: z.string(),
-  phone: z.string().optional().nullable(),
-  email: z.string().optional().nullable(),
-  relationship: z.string().optional().nullable(),
-  custom_relationship: z.string().optional().nullable(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  relationship: z.string().optional(),
+  custom_relationship: z.string().optional(),
   is_active: z.boolean().optional(),
-  priority_order: z.number().int().optional().nullable(),
+  priority_order: z.number().int().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
 });
@@ -2177,12 +2178,12 @@ export const SupportContactUncheckedCreateInputSchema: z.ZodType<Prisma.SupportC
 export const SupportContactUpdateInputSchema: z.ZodType<Prisma.SupportContactUpdateInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   contact_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  email: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  custom_relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phone: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  priority_order: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  priority_order: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutContactsNestedInputSchema).optional(),
@@ -2192,12 +2193,12 @@ export const SupportContactUncheckedUpdateInputSchema: z.ZodType<Prisma.SupportC
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   contact_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  email: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  custom_relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phone: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  priority_order: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  priority_order: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -2206,12 +2207,12 @@ export const SupportContactCreateManyInputSchema: z.ZodType<Prisma.SupportContac
   id: z.uuid().optional(),
   user_id: z.string(),
   contact_name: z.string(),
-  phone: z.string().optional().nullable(),
-  email: z.string().optional().nullable(),
-  relationship: z.string().optional().nullable(),
-  custom_relationship: z.string().optional().nullable(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  relationship: z.string().optional(),
+  custom_relationship: z.string().optional(),
   is_active: z.boolean().optional(),
-  priority_order: z.number().int().optional().nullable(),
+  priority_order: z.number().int().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
 });
@@ -2219,12 +2220,12 @@ export const SupportContactCreateManyInputSchema: z.ZodType<Prisma.SupportContac
 export const SupportContactUpdateManyMutationInputSchema: z.ZodType<Prisma.SupportContactUpdateManyMutationInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   contact_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  email: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  custom_relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phone: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  priority_order: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  priority_order: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -2233,12 +2234,12 @@ export const SupportContactUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Supp
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   contact_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  email: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  custom_relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phone: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  priority_order: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  priority_order: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -2247,7 +2248,7 @@ export const EmergencyAlertCreateInputSchema: z.ZodType<Prisma.EmergencyAlertCre
   id: z.uuid().optional(),
   activated_at: z.coerce.date().optional(),
   resulted_in_relapse: z.boolean().optional(),
-  resolution_notes: z.string().optional().nullable(),
+  resolution_notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutAlertsInputSchema),
   addiction: z.lazy(() => UserAddictionCreateNestedOneWithoutAlertsInputSchema),
@@ -2259,7 +2260,7 @@ export const EmergencyAlertUncheckedCreateInputSchema: z.ZodType<Prisma.Emergenc
   user_addiction_id: z.string(),
   activated_at: z.coerce.date().optional(),
   resulted_in_relapse: z.boolean().optional(),
-  resolution_notes: z.string().optional().nullable(),
+  resolution_notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -2267,7 +2268,7 @@ export const EmergencyAlertUpdateInputSchema: z.ZodType<Prisma.EmergencyAlertUpd
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutAlertsNestedInputSchema).optional(),
   addiction: z.lazy(() => UserAddictionUpdateOneRequiredWithoutAlertsNestedInputSchema).optional(),
@@ -2279,7 +2280,7 @@ export const EmergencyAlertUncheckedUpdateInputSchema: z.ZodType<Prisma.Emergenc
   user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -2289,7 +2290,7 @@ export const EmergencyAlertCreateManyInputSchema: z.ZodType<Prisma.EmergencyAler
   user_addiction_id: z.string(),
   activated_at: z.coerce.date().optional(),
   resulted_in_relapse: z.boolean().optional(),
-  resolution_notes: z.string().optional().nullable(),
+  resolution_notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -2297,7 +2298,7 @@ export const EmergencyAlertUpdateManyMutationInputSchema: z.ZodType<Prisma.Emerg
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -2307,16 +2308,16 @@ export const EmergencyAlertUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Emer
   user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const StreakCreateInputSchema: z.ZodType<Prisma.StreakCreateInput> = z.strictObject({
   id: z.uuid().optional(),
-  status: z.string().optional().nullable(),
+  status: z.string().optional(),
   started_at: z.coerce.date(),
   day_counter: z.number().int().optional(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutStreakInputSchema),
   addiction: z.lazy(() => UserAddictionCreateNestedOneWithoutStreakInputSchema),
@@ -2327,20 +2328,20 @@ export const StreakUncheckedCreateInputSchema: z.ZodType<Prisma.StreakUncheckedC
   id: z.uuid().optional(),
   user_id: z.string(),
   user_addiction_id: z.string(),
-  status: z.string().optional().nullable(),
+  status: z.string().optional(),
   started_at: z.coerce.date(),
   day_counter: z.number().int().optional(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   events: z.lazy(() => StreakEventUncheckedCreateNestedManyWithoutStreakInputSchema).optional(),
 });
 
 export const StreakUpdateInputSchema: z.ZodType<Prisma.StreakUpdateInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutStreakNestedInputSchema).optional(),
   addiction: z.lazy(() => UserAddictionUpdateOneRequiredWithoutStreakNestedInputSchema).optional(),
@@ -2351,10 +2352,10 @@ export const StreakUncheckedUpdateInputSchema: z.ZodType<Prisma.StreakUncheckedU
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   events: z.lazy(() => StreakEventUncheckedUpdateManyWithoutStreakNestedInputSchema).optional(),
 });
@@ -2363,19 +2364,19 @@ export const StreakCreateManyInputSchema: z.ZodType<Prisma.StreakCreateManyInput
   id: z.uuid().optional(),
   user_id: z.string(),
   user_addiction_id: z.string(),
-  status: z.string().optional().nullable(),
+  status: z.string().optional(),
   started_at: z.coerce.date(),
   day_counter: z.number().int().optional(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
 });
 
 export const StreakUpdateManyMutationInputSchema: z.ZodType<Prisma.StreakUpdateManyMutationInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -2383,10 +2384,10 @@ export const StreakUncheckedUpdateManyInputSchema: z.ZodType<Prisma.StreakUnchec
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -2417,21 +2418,6 @@ export const StringFilterSchema: z.ZodType<Prisma.StringFilter> = z.strictObject
   not: z.union([ z.string(),z.lazy(() => NestedStringFilterSchema) ]).optional(),
 });
 
-export const StringNullableFilterSchema: z.ZodType<Prisma.StringNullableFilter> = z.strictObject({
-  equals: z.string().optional().nullable(),
-  in: z.string().array().optional().nullable(),
-  notIn: z.string().array().optional().nullable(),
-  lt: z.string().optional(),
-  lte: z.string().optional(),
-  gt: z.string().optional(),
-  gte: z.string().optional(),
-  contains: z.string().optional(),
-  startsWith: z.string().optional(),
-  endsWith: z.string().optional(),
-  mode: z.lazy(() => QueryModeSchema).optional(),
-  not: z.union([ z.string(),z.lazy(() => NestedStringNullableFilterSchema) ]).optional().nullable(),
-});
-
 export const DateTimeFilterSchema: z.ZodType<Prisma.DateTimeFilter> = z.strictObject({
   equals: z.coerce.date().optional(),
   in: z.coerce.date().array().optional(),
@@ -2443,9 +2429,10 @@ export const DateTimeFilterSchema: z.ZodType<Prisma.DateTimeFilter> = z.strictOb
   not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeFilterSchema) ]).optional(),
 });
 
-export const UserAddictionNullableScalarRelationFilterSchema: z.ZodType<Prisma.UserAddictionNullableScalarRelationFilter> = z.strictObject({
-  is: z.lazy(() => UserAddictionWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => UserAddictionWhereInputSchema).optional().nullable(),
+export const UserAddictionListRelationFilterSchema: z.ZodType<Prisma.UserAddictionListRelationFilter> = z.strictObject({
+  every: z.lazy(() => UserAddictionWhereInputSchema).optional(),
+  some: z.lazy(() => UserAddictionWhereInputSchema).optional(),
+  none: z.lazy(() => UserAddictionWhereInputSchema).optional(),
 });
 
 export const DailyLogListRelationFilterSchema: z.ZodType<Prisma.DailyLogListRelationFilter> = z.strictObject({
@@ -2472,9 +2459,10 @@ export const EmergencyAlertListRelationFilterSchema: z.ZodType<Prisma.EmergencyA
   none: z.lazy(() => EmergencyAlertWhereInputSchema).optional(),
 });
 
-export const StreakNullableScalarRelationFilterSchema: z.ZodType<Prisma.StreakNullableScalarRelationFilter> = z.strictObject({
-  is: z.lazy(() => StreakWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => StreakWhereInputSchema).optional().nullable(),
+export const StreakListRelationFilterSchema: z.ZodType<Prisma.StreakListRelationFilter> = z.strictObject({
+  every: z.lazy(() => StreakWhereInputSchema).optional(),
+  some: z.lazy(() => StreakWhereInputSchema).optional(),
+  none: z.lazy(() => StreakWhereInputSchema).optional(),
 });
 
 export const LogAbsenceListRelationFilterSchema: z.ZodType<Prisma.LogAbsenceListRelationFilter> = z.strictObject({
@@ -2483,9 +2471,8 @@ export const LogAbsenceListRelationFilterSchema: z.ZodType<Prisma.LogAbsenceList
   none: z.lazy(() => LogAbsenceWhereInputSchema).optional(),
 });
 
-export const SortOrderInputSchema: z.ZodType<Prisma.SortOrderInput> = z.strictObject({
-  sort: z.lazy(() => SortOrderSchema),
-  nulls: z.lazy(() => NullsOrderSchema).optional(),
+export const UserAddictionOrderByRelationAggregateInputSchema: z.ZodType<Prisma.UserAddictionOrderByRelationAggregateInput> = z.strictObject({
+  _count: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const DailyLogOrderByRelationAggregateInputSchema: z.ZodType<Prisma.DailyLogOrderByRelationAggregateInput> = z.strictObject({
@@ -2501,6 +2488,10 @@ export const SupportContactOrderByRelationAggregateInputSchema: z.ZodType<Prisma
 });
 
 export const EmergencyAlertOrderByRelationAggregateInputSchema: z.ZodType<Prisma.EmergencyAlertOrderByRelationAggregateInput> = z.strictObject({
+  _count: z.lazy(() => SortOrderSchema).optional(),
+});
+
+export const StreakOrderByRelationAggregateInputSchema: z.ZodType<Prisma.StreakOrderByRelationAggregateInput> = z.strictObject({
   _count: z.lazy(() => SortOrderSchema).optional(),
 });
 
@@ -2569,24 +2560,6 @@ export const StringWithAggregatesFilterSchema: z.ZodType<Prisma.StringWithAggreg
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
   _min: z.lazy(() => NestedStringFilterSchema).optional(),
   _max: z.lazy(() => NestedStringFilterSchema).optional(),
-});
-
-export const StringNullableWithAggregatesFilterSchema: z.ZodType<Prisma.StringNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.string().optional().nullable(),
-  in: z.string().array().optional().nullable(),
-  notIn: z.string().array().optional().nullable(),
-  lt: z.string().optional(),
-  lte: z.string().optional(),
-  gt: z.string().optional(),
-  gte: z.string().optional(),
-  contains: z.string().optional(),
-  startsWith: z.string().optional(),
-  endsWith: z.string().optional(),
-  mode: z.lazy(() => QueryModeSchema).optional(),
-  not: z.union([ z.string(),z.lazy(() => NestedStringNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedStringNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedStringNullableFilterSchema).optional(),
 });
 
 export const DateTimeWithAggregatesFilterSchema: z.ZodType<Prisma.DateTimeWithAggregatesFilter> = z.strictObject({
@@ -2736,34 +2709,6 @@ export const BoolWithAggregatesFilterSchema: z.ZodType<Prisma.BoolWithAggregates
   _max: z.lazy(() => NestedBoolFilterSchema).optional(),
 });
 
-export const UuidNullableFilterSchema: z.ZodType<Prisma.UuidNullableFilter> = z.strictObject({
-  equals: z.string().optional().nullable(),
-  in: z.string().array().optional().nullable(),
-  notIn: z.string().array().optional().nullable(),
-  lt: z.string().optional(),
-  lte: z.string().optional(),
-  gt: z.string().optional(),
-  gte: z.string().optional(),
-  mode: z.lazy(() => QueryModeSchema).optional(),
-  not: z.union([ z.string(),z.lazy(() => NestedUuidNullableFilterSchema) ]).optional().nullable(),
-});
-
-export const DateTimeNullableFilterSchema: z.ZodType<Prisma.DateTimeNullableFilter> = z.strictObject({
-  equals: z.coerce.date().optional().nullable(),
-  in: z.coerce.date().array().optional().nullable(),
-  notIn: z.coerce.date().array().optional().nullable(),
-  lt: z.coerce.date().optional(),
-  lte: z.coerce.date().optional(),
-  gt: z.coerce.date().optional(),
-  gte: z.coerce.date().optional(),
-  not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeNullableFilterSchema) ]).optional().nullable(),
-});
-
-export const UserNullableScalarRelationFilterSchema: z.ZodType<Prisma.UserNullableScalarRelationFilter> = z.strictObject({
-  is: z.lazy(() => UserWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => UserWhereInputSchema).optional().nullable(),
-});
-
 export const SponsorshipCountOrderByAggregateInputSchema: z.ZodType<Prisma.SponsorshipCountOrderByAggregateInput> = z.strictObject({
   id: z.lazy(() => SortOrderSchema).optional(),
   sponsor_id: z.lazy(() => SortOrderSchema).optional(),
@@ -2797,43 +2742,14 @@ export const SponsorshipMinOrderByAggregateInputSchema: z.ZodType<Prisma.Sponsor
   created_at: z.lazy(() => SortOrderSchema).optional(),
 });
 
-export const UuidNullableWithAggregatesFilterSchema: z.ZodType<Prisma.UuidNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.string().optional().nullable(),
-  in: z.string().array().optional().nullable(),
-  notIn: z.string().array().optional().nullable(),
-  lt: z.string().optional(),
-  lte: z.string().optional(),
-  gt: z.string().optional(),
-  gte: z.string().optional(),
-  mode: z.lazy(() => QueryModeSchema).optional(),
-  not: z.union([ z.string(),z.lazy(() => NestedUuidNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedStringNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedStringNullableFilterSchema).optional(),
+export const CravingLevelScalarRelationFilterSchema: z.ZodType<Prisma.CravingLevelScalarRelationFilter> = z.strictObject({
+  is: z.lazy(() => CravingLevelWhereInputSchema).optional(),
+  isNot: z.lazy(() => CravingLevelWhereInputSchema).optional(),
 });
 
-export const DateTimeNullableWithAggregatesFilterSchema: z.ZodType<Prisma.DateTimeNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.coerce.date().optional().nullable(),
-  in: z.coerce.date().array().optional().nullable(),
-  notIn: z.coerce.date().array().optional().nullable(),
-  lt: z.coerce.date().optional(),
-  lte: z.coerce.date().optional(),
-  gt: z.coerce.date().optional(),
-  gte: z.coerce.date().optional(),
-  not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedDateTimeNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedDateTimeNullableFilterSchema).optional(),
-});
-
-export const CravingLevelNullableScalarRelationFilterSchema: z.ZodType<Prisma.CravingLevelNullableScalarRelationFilter> = z.strictObject({
-  is: z.lazy(() => CravingLevelWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => CravingLevelWhereInputSchema).optional().nullable(),
-});
-
-export const EmotionalStateNullableScalarRelationFilterSchema: z.ZodType<Prisma.EmotionalStateNullableScalarRelationFilter> = z.strictObject({
-  is: z.lazy(() => EmotionalStateWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => EmotionalStateWhereInputSchema).optional().nullable(),
+export const EmotionalStateScalarRelationFilterSchema: z.ZodType<Prisma.EmotionalStateScalarRelationFilter> = z.strictObject({
+  is: z.lazy(() => EmotionalStateWhereInputSchema).optional(),
+  isNot: z.lazy(() => EmotionalStateWhereInputSchema).optional(),
 });
 
 export const DailyLogUser_idLog_dateCompoundUniqueInputSchema: z.ZodType<Prisma.DailyLogUser_idLog_dateCompoundUniqueInput> = z.strictObject({
@@ -2877,26 +2793,15 @@ export const DailyLogMinOrderByAggregateInputSchema: z.ZodType<Prisma.DailyLogMi
   created_at: z.lazy(() => SortOrderSchema).optional(),
 });
 
-export const IntNullableFilterSchema: z.ZodType<Prisma.IntNullableFilter> = z.strictObject({
-  equals: z.number().optional().nullable(),
-  in: z.number().array().optional().nullable(),
-  notIn: z.number().array().optional().nullable(),
-  lt: z.number().optional(),
-  lte: z.number().optional(),
-  gt: z.number().optional(),
-  gte: z.number().optional(),
-  not: z.union([ z.number(),z.lazy(() => NestedIntNullableFilterSchema) ]).optional().nullable(),
-});
-
-export const DecimalNullableFilterSchema: z.ZodType<Prisma.DecimalNullableFilter> = z.strictObject({
-  equals: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  in: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional().nullable(),
-  notIn: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional().nullable(),
+export const DecimalFilterSchema: z.ZodType<Prisma.DecimalFilter> = z.strictObject({
+  equals: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  in: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional(),
+  notIn: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional(),
   lt: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   lte: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   gt: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   gte: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
-  not: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NestedDecimalNullableFilterSchema) ]).optional().nullable(),
+  not: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NestedDecimalFilterSchema) ]).optional(),
 });
 
 export const StreakScalarRelationFilterSchema: z.ZodType<Prisma.StreakScalarRelationFilter> = z.strictObject({
@@ -2952,41 +2857,25 @@ export const StreakEventSumOrderByAggregateInputSchema: z.ZodType<Prisma.StreakE
   avg_emotion_period: z.lazy(() => SortOrderSchema).optional(),
 });
 
-export const IntNullableWithAggregatesFilterSchema: z.ZodType<Prisma.IntNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.number().optional().nullable(),
-  in: z.number().array().optional().nullable(),
-  notIn: z.number().array().optional().nullable(),
-  lt: z.number().optional(),
-  lte: z.number().optional(),
-  gt: z.number().optional(),
-  gte: z.number().optional(),
-  not: z.union([ z.number(),z.lazy(() => NestedIntNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _avg: z.lazy(() => NestedFloatNullableFilterSchema).optional(),
-  _sum: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-});
-
-export const DecimalNullableWithAggregatesFilterSchema: z.ZodType<Prisma.DecimalNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  in: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional().nullable(),
-  notIn: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional().nullable(),
+export const DecimalWithAggregatesFilterSchema: z.ZodType<Prisma.DecimalWithAggregatesFilter> = z.strictObject({
+  equals: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  in: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional(),
+  notIn: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional(),
   lt: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   lte: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   gt: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   gte: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
-  not: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NestedDecimalNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _avg: z.lazy(() => NestedDecimalNullableFilterSchema).optional(),
-  _sum: z.lazy(() => NestedDecimalNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedDecimalNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedDecimalNullableFilterSchema).optional(),
+  not: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NestedDecimalWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _avg: z.lazy(() => NestedDecimalFilterSchema).optional(),
+  _sum: z.lazy(() => NestedDecimalFilterSchema).optional(),
+  _min: z.lazy(() => NestedDecimalFilterSchema).optional(),
+  _max: z.lazy(() => NestedDecimalFilterSchema).optional(),
 });
 
-export const StreakEventNullableScalarRelationFilterSchema: z.ZodType<Prisma.StreakEventNullableScalarRelationFilter> = z.strictObject({
-  is: z.lazy(() => StreakEventWhereInputSchema).optional().nullable(),
-  isNot: z.lazy(() => StreakEventWhereInputSchema).optional().nullable(),
+export const StreakEventScalarRelationFilterSchema: z.ZodType<Prisma.StreakEventScalarRelationFilter> = z.strictObject({
+  is: z.lazy(() => StreakEventWhereInputSchema).optional(),
+  isNot: z.lazy(() => StreakEventWhereInputSchema).optional(),
 });
 
 export const LogAbsenceCountOrderByAggregateInputSchema: z.ZodType<Prisma.LogAbsenceCountOrderByAggregateInput> = z.strictObject({
@@ -3166,10 +3055,11 @@ export const StreakSumOrderByAggregateInputSchema: z.ZodType<Prisma.StreakSumOrd
   day_counter: z.lazy(() => SortOrderSchema).optional(),
 });
 
-export const UserAddictionCreateNestedOneWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionCreateNestedOneWithoutUserInput> = z.strictObject({
-  create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema).optional(),
-  connect: z.lazy(() => UserAddictionWhereUniqueInputSchema).optional(),
+export const UserAddictionCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionCreateNestedManyWithoutUserInput> = z.strictObject({
+  create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionCreateWithoutUserInputSchema).array(), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema), z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserAddictionCreateManyUserInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
 });
 
 export const DailyLogCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.DailyLogCreateNestedManyWithoutUserInput> = z.strictObject({
@@ -3207,10 +3097,11 @@ export const EmergencyAlertCreateNestedManyWithoutUserInputSchema: z.ZodType<Pri
   connect: z.union([ z.lazy(() => EmergencyAlertWhereUniqueInputSchema), z.lazy(() => EmergencyAlertWhereUniqueInputSchema).array() ]).optional(),
 });
 
-export const StreakCreateNestedOneWithoutUserInputSchema: z.ZodType<Prisma.StreakCreateNestedOneWithoutUserInput> = z.strictObject({
-  create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema).optional(),
-  connect: z.lazy(() => StreakWhereUniqueInputSchema).optional(),
+export const StreakCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.StreakCreateNestedManyWithoutUserInput> = z.strictObject({
+  create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakCreateWithoutUserInputSchema).array(), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema), z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => StreakCreateManyUserInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
 });
 
 export const LogAbsenceCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.LogAbsenceCreateNestedManyWithoutUserInput> = z.strictObject({
@@ -3220,10 +3111,11 @@ export const LogAbsenceCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.
   connect: z.union([ z.lazy(() => LogAbsenceWhereUniqueInputSchema), z.lazy(() => LogAbsenceWhereUniqueInputSchema).array() ]).optional(),
 });
 
-export const UserAddictionUncheckedCreateNestedOneWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUncheckedCreateNestedOneWithoutUserInput> = z.strictObject({
-  create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema).optional(),
-  connect: z.lazy(() => UserAddictionWhereUniqueInputSchema).optional(),
+export const UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUncheckedCreateNestedManyWithoutUserInput> = z.strictObject({
+  create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionCreateWithoutUserInputSchema).array(), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema), z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserAddictionCreateManyUserInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
 });
 
 export const DailyLogUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.DailyLogUncheckedCreateNestedManyWithoutUserInput> = z.strictObject({
@@ -3261,10 +3153,11 @@ export const EmergencyAlertUncheckedCreateNestedManyWithoutUserInputSchema: z.Zo
   connect: z.union([ z.lazy(() => EmergencyAlertWhereUniqueInputSchema), z.lazy(() => EmergencyAlertWhereUniqueInputSchema).array() ]).optional(),
 });
 
-export const StreakUncheckedCreateNestedOneWithoutUserInputSchema: z.ZodType<Prisma.StreakUncheckedCreateNestedOneWithoutUserInput> = z.strictObject({
-  create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema).optional(),
-  connect: z.lazy(() => StreakWhereUniqueInputSchema).optional(),
+export const StreakUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.StreakUncheckedCreateNestedManyWithoutUserInput> = z.strictObject({
+  create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakCreateWithoutUserInputSchema).array(), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema), z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => StreakCreateManyUserInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
 });
 
 export const LogAbsenceUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.LogAbsenceUncheckedCreateNestedManyWithoutUserInput> = z.strictObject({
@@ -3278,22 +3171,22 @@ export const StringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.StringFiel
   set: z.string().optional(),
 });
 
-export const NullableStringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableStringFieldUpdateOperationsInput> = z.strictObject({
-  set: z.string().optional().nullable(),
-});
-
 export const DateTimeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.DateTimeFieldUpdateOperationsInput> = z.strictObject({
   set: z.coerce.date().optional(),
 });
 
-export const UserAddictionUpdateOneWithoutUserNestedInputSchema: z.ZodType<Prisma.UserAddictionUpdateOneWithoutUserNestedInput> = z.strictObject({
-  create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema).optional(),
-  upsert: z.lazy(() => UserAddictionUpsertWithoutUserInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => UserAddictionWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => UserAddictionWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => UserAddictionWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => UserAddictionUpdateToOneWithWhereWithoutUserInputSchema), z.lazy(() => UserAddictionUpdateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedUpdateWithoutUserInputSchema) ]).optional(),
+export const UserAddictionUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.UserAddictionUpdateManyWithoutUserNestedInput> = z.strictObject({
+  create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionCreateWithoutUserInputSchema).array(), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema), z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => UserAddictionUpsertWithWhereUniqueWithoutUserInputSchema), z.lazy(() => UserAddictionUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserAddictionCreateManyUserInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => UserAddictionUpdateWithWhereUniqueWithoutUserInputSchema), z.lazy(() => UserAddictionUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => UserAddictionUpdateManyWithWhereWithoutUserInputSchema), z.lazy(() => UserAddictionUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => UserAddictionScalarWhereInputSchema), z.lazy(() => UserAddictionScalarWhereInputSchema).array() ]).optional(),
 });
 
 export const DailyLogUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.DailyLogUpdateManyWithoutUserNestedInput> = z.strictObject({
@@ -3366,14 +3259,18 @@ export const EmergencyAlertUpdateManyWithoutUserNestedInputSchema: z.ZodType<Pri
   deleteMany: z.union([ z.lazy(() => EmergencyAlertScalarWhereInputSchema), z.lazy(() => EmergencyAlertScalarWhereInputSchema).array() ]).optional(),
 });
 
-export const StreakUpdateOneWithoutUserNestedInputSchema: z.ZodType<Prisma.StreakUpdateOneWithoutUserNestedInput> = z.strictObject({
-  create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema).optional(),
-  upsert: z.lazy(() => StreakUpsertWithoutUserInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => StreakWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => StreakWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => StreakWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => StreakUpdateToOneWithWhereWithoutUserInputSchema), z.lazy(() => StreakUpdateWithoutUserInputSchema), z.lazy(() => StreakUncheckedUpdateWithoutUserInputSchema) ]).optional(),
+export const StreakUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.StreakUpdateManyWithoutUserNestedInput> = z.strictObject({
+  create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakCreateWithoutUserInputSchema).array(), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema), z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => StreakUpsertWithWhereUniqueWithoutUserInputSchema), z.lazy(() => StreakUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => StreakCreateManyUserInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => StreakUpdateWithWhereUniqueWithoutUserInputSchema), z.lazy(() => StreakUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => StreakUpdateManyWithWhereWithoutUserInputSchema), z.lazy(() => StreakUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => StreakScalarWhereInputSchema), z.lazy(() => StreakScalarWhereInputSchema).array() ]).optional(),
 });
 
 export const LogAbsenceUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.LogAbsenceUpdateManyWithoutUserNestedInput> = z.strictObject({
@@ -3390,14 +3287,18 @@ export const LogAbsenceUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.
   deleteMany: z.union([ z.lazy(() => LogAbsenceScalarWhereInputSchema), z.lazy(() => LogAbsenceScalarWhereInputSchema).array() ]).optional(),
 });
 
-export const UserAddictionUncheckedUpdateOneWithoutUserNestedInputSchema: z.ZodType<Prisma.UserAddictionUncheckedUpdateOneWithoutUserNestedInput> = z.strictObject({
-  create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema).optional(),
-  upsert: z.lazy(() => UserAddictionUpsertWithoutUserInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => UserAddictionWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => UserAddictionWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => UserAddictionWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => UserAddictionUpdateToOneWithWhereWithoutUserInputSchema), z.lazy(() => UserAddictionUpdateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedUpdateWithoutUserInputSchema) ]).optional(),
+export const UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.UserAddictionUncheckedUpdateManyWithoutUserNestedInput> = z.strictObject({
+  create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionCreateWithoutUserInputSchema).array(), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema), z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => UserAddictionUpsertWithWhereUniqueWithoutUserInputSchema), z.lazy(() => UserAddictionUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => UserAddictionCreateManyUserInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => UserAddictionWhereUniqueInputSchema), z.lazy(() => UserAddictionWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => UserAddictionUpdateWithWhereUniqueWithoutUserInputSchema), z.lazy(() => UserAddictionUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => UserAddictionUpdateManyWithWhereWithoutUserInputSchema), z.lazy(() => UserAddictionUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => UserAddictionScalarWhereInputSchema), z.lazy(() => UserAddictionScalarWhereInputSchema).array() ]).optional(),
 });
 
 export const DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.DailyLogUncheckedUpdateManyWithoutUserNestedInput> = z.strictObject({
@@ -3470,14 +3371,18 @@ export const EmergencyAlertUncheckedUpdateManyWithoutUserNestedInputSchema: z.Zo
   deleteMany: z.union([ z.lazy(() => EmergencyAlertScalarWhereInputSchema), z.lazy(() => EmergencyAlertScalarWhereInputSchema).array() ]).optional(),
 });
 
-export const StreakUncheckedUpdateOneWithoutUserNestedInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateOneWithoutUserNestedInput> = z.strictObject({
-  create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema).optional(),
-  upsert: z.lazy(() => StreakUpsertWithoutUserInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => StreakWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => StreakWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => StreakWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => StreakUpdateToOneWithWhereWithoutUserInputSchema), z.lazy(() => StreakUpdateWithoutUserInputSchema), z.lazy(() => StreakUncheckedUpdateWithoutUserInputSchema) ]).optional(),
+export const StreakUncheckedUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateManyWithoutUserNestedInput> = z.strictObject({
+  create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakCreateWithoutUserInputSchema).array(), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema), z.lazy(() => StreakCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => StreakUpsertWithWhereUniqueWithoutUserInputSchema), z.lazy(() => StreakUpsertWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => StreakCreateManyUserInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => StreakUpdateWithWhereUniqueWithoutUserInputSchema), z.lazy(() => StreakUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => StreakUpdateManyWithWhereWithoutUserInputSchema), z.lazy(() => StreakUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => StreakScalarWhereInputSchema), z.lazy(() => StreakScalarWhereInputSchema).array() ]).optional(),
 });
 
 export const LogAbsenceUncheckedUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.LogAbsenceUncheckedUpdateManyWithoutUserNestedInput> = z.strictObject({
@@ -3592,10 +3497,11 @@ export const UserCreateNestedOneWithoutAddictionsInputSchema: z.ZodType<Prisma.U
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
 });
 
-export const StreakCreateNestedOneWithoutAddictionInputSchema: z.ZodType<Prisma.StreakCreateNestedOneWithoutAddictionInput> = z.strictObject({
-  create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema).optional(),
-  connect: z.lazy(() => StreakWhereUniqueInputSchema).optional(),
+export const StreakCreateNestedManyWithoutAddictionInputSchema: z.ZodType<Prisma.StreakCreateNestedManyWithoutAddictionInput> = z.strictObject({
+  create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakCreateWithoutAddictionInputSchema).array(), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema), z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => StreakCreateManyAddictionInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
 });
 
 export const EmergencyAlertCreateNestedManyWithoutAddictionInputSchema: z.ZodType<Prisma.EmergencyAlertCreateNestedManyWithoutAddictionInput> = z.strictObject({
@@ -3605,10 +3511,11 @@ export const EmergencyAlertCreateNestedManyWithoutAddictionInputSchema: z.ZodTyp
   connect: z.union([ z.lazy(() => EmergencyAlertWhereUniqueInputSchema), z.lazy(() => EmergencyAlertWhereUniqueInputSchema).array() ]).optional(),
 });
 
-export const StreakUncheckedCreateNestedOneWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUncheckedCreateNestedOneWithoutAddictionInput> = z.strictObject({
-  create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema).optional(),
-  connect: z.lazy(() => StreakWhereUniqueInputSchema).optional(),
+export const StreakUncheckedCreateNestedManyWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUncheckedCreateNestedManyWithoutAddictionInput> = z.strictObject({
+  create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakCreateWithoutAddictionInputSchema).array(), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema), z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => StreakCreateManyAddictionInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
 });
 
 export const EmergencyAlertUncheckedCreateNestedManyWithoutAddictionInputSchema: z.ZodType<Prisma.EmergencyAlertUncheckedCreateNestedManyWithoutAddictionInput> = z.strictObject({
@@ -3630,14 +3537,18 @@ export const UserUpdateOneRequiredWithoutAddictionsNestedInputSchema: z.ZodType<
   update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutAddictionsInputSchema), z.lazy(() => UserUpdateWithoutAddictionsInputSchema), z.lazy(() => UserUncheckedUpdateWithoutAddictionsInputSchema) ]).optional(),
 });
 
-export const StreakUpdateOneWithoutAddictionNestedInputSchema: z.ZodType<Prisma.StreakUpdateOneWithoutAddictionNestedInput> = z.strictObject({
-  create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema).optional(),
-  upsert: z.lazy(() => StreakUpsertWithoutAddictionInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => StreakWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => StreakWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => StreakWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => StreakUpdateToOneWithWhereWithoutAddictionInputSchema), z.lazy(() => StreakUpdateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedUpdateWithoutAddictionInputSchema) ]).optional(),
+export const StreakUpdateManyWithoutAddictionNestedInputSchema: z.ZodType<Prisma.StreakUpdateManyWithoutAddictionNestedInput> = z.strictObject({
+  create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakCreateWithoutAddictionInputSchema).array(), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema), z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => StreakUpsertWithWhereUniqueWithoutAddictionInputSchema), z.lazy(() => StreakUpsertWithWhereUniqueWithoutAddictionInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => StreakCreateManyAddictionInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => StreakUpdateWithWhereUniqueWithoutAddictionInputSchema), z.lazy(() => StreakUpdateWithWhereUniqueWithoutAddictionInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => StreakUpdateManyWithWhereWithoutAddictionInputSchema), z.lazy(() => StreakUpdateManyWithWhereWithoutAddictionInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => StreakScalarWhereInputSchema), z.lazy(() => StreakScalarWhereInputSchema).array() ]).optional(),
 });
 
 export const EmergencyAlertUpdateManyWithoutAddictionNestedInputSchema: z.ZodType<Prisma.EmergencyAlertUpdateManyWithoutAddictionNestedInput> = z.strictObject({
@@ -3654,14 +3565,18 @@ export const EmergencyAlertUpdateManyWithoutAddictionNestedInputSchema: z.ZodTyp
   deleteMany: z.union([ z.lazy(() => EmergencyAlertScalarWhereInputSchema), z.lazy(() => EmergencyAlertScalarWhereInputSchema).array() ]).optional(),
 });
 
-export const StreakUncheckedUpdateOneWithoutAddictionNestedInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateOneWithoutAddictionNestedInput> = z.strictObject({
-  create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema) ]).optional(),
-  connectOrCreate: z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema).optional(),
-  upsert: z.lazy(() => StreakUpsertWithoutAddictionInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => StreakWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => StreakWhereInputSchema) ]).optional(),
-  connect: z.lazy(() => StreakWhereUniqueInputSchema).optional(),
-  update: z.union([ z.lazy(() => StreakUpdateToOneWithWhereWithoutAddictionInputSchema), z.lazy(() => StreakUpdateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedUpdateWithoutAddictionInputSchema) ]).optional(),
+export const StreakUncheckedUpdateManyWithoutAddictionNestedInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateManyWithoutAddictionNestedInput> = z.strictObject({
+  create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakCreateWithoutAddictionInputSchema).array(), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema), z.lazy(() => StreakCreateOrConnectWithoutAddictionInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => StreakUpsertWithWhereUniqueWithoutAddictionInputSchema), z.lazy(() => StreakUpsertWithWhereUniqueWithoutAddictionInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => StreakCreateManyAddictionInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => StreakWhereUniqueInputSchema), z.lazy(() => StreakWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => StreakUpdateWithWhereUniqueWithoutAddictionInputSchema), z.lazy(() => StreakUpdateWithWhereUniqueWithoutAddictionInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => StreakUpdateManyWithWhereWithoutAddictionInputSchema), z.lazy(() => StreakUpdateManyWithWhereWithoutAddictionInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => StreakScalarWhereInputSchema), z.lazy(() => StreakScalarWhereInputSchema).array() ]).optional(),
 });
 
 export const EmergencyAlertUncheckedUpdateManyWithoutAddictionNestedInputSchema: z.ZodType<Prisma.EmergencyAlertUncheckedUpdateManyWithoutAddictionNestedInput> = z.strictObject({
@@ -3690,26 +3605,18 @@ export const UserCreateNestedOneWithoutSponsorships_as_addictInputSchema: z.ZodT
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
 });
 
-export const NullableDateTimeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableDateTimeFieldUpdateOperationsInput> = z.strictObject({
-  set: z.coerce.date().optional().nullable(),
-});
-
-export const UserUpdateOneWithoutSponsorships_as_sponsorNestedInputSchema: z.ZodType<Prisma.UserUpdateOneWithoutSponsorships_as_sponsorNestedInput> = z.strictObject({
+export const UserUpdateOneRequiredWithoutSponsorships_as_sponsorNestedInputSchema: z.ZodType<Prisma.UserUpdateOneRequiredWithoutSponsorships_as_sponsorNestedInput> = z.strictObject({
   create: z.union([ z.lazy(() => UserCreateWithoutSponsorships_as_sponsorInputSchema), z.lazy(() => UserUncheckedCreateWithoutSponsorships_as_sponsorInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutSponsorships_as_sponsorInputSchema).optional(),
   upsert: z.lazy(() => UserUpsertWithoutSponsorships_as_sponsorInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutSponsorships_as_sponsorInputSchema), z.lazy(() => UserUpdateWithoutSponsorships_as_sponsorInputSchema), z.lazy(() => UserUncheckedUpdateWithoutSponsorships_as_sponsorInputSchema) ]).optional(),
 });
 
-export const UserUpdateOneWithoutSponsorships_as_addictNestedInputSchema: z.ZodType<Prisma.UserUpdateOneWithoutSponsorships_as_addictNestedInput> = z.strictObject({
+export const UserUpdateOneRequiredWithoutSponsorships_as_addictNestedInputSchema: z.ZodType<Prisma.UserUpdateOneRequiredWithoutSponsorships_as_addictNestedInput> = z.strictObject({
   create: z.union([ z.lazy(() => UserCreateWithoutSponsorships_as_addictInputSchema), z.lazy(() => UserUncheckedCreateWithoutSponsorships_as_addictInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutSponsorships_as_addictInputSchema).optional(),
   upsert: z.lazy(() => UserUpsertWithoutSponsorships_as_addictInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => UserWhereInputSchema) ]).optional(),
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutSponsorships_as_addictInputSchema), z.lazy(() => UserUpdateWithoutSponsorships_as_addictInputSchema), z.lazy(() => UserUncheckedUpdateWithoutSponsorships_as_addictInputSchema) ]).optional(),
 });
@@ -3740,22 +3647,18 @@ export const UserUpdateOneRequiredWithoutDaily_logsNestedInputSchema: z.ZodType<
   update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutDaily_logsInputSchema), z.lazy(() => UserUpdateWithoutDaily_logsInputSchema), z.lazy(() => UserUncheckedUpdateWithoutDaily_logsInputSchema) ]).optional(),
 });
 
-export const CravingLevelUpdateOneWithoutDaily_logsNestedInputSchema: z.ZodType<Prisma.CravingLevelUpdateOneWithoutDaily_logsNestedInput> = z.strictObject({
+export const CravingLevelUpdateOneRequiredWithoutDaily_logsNestedInputSchema: z.ZodType<Prisma.CravingLevelUpdateOneRequiredWithoutDaily_logsNestedInput> = z.strictObject({
   create: z.union([ z.lazy(() => CravingLevelCreateWithoutDaily_logsInputSchema), z.lazy(() => CravingLevelUncheckedCreateWithoutDaily_logsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => CravingLevelCreateOrConnectWithoutDaily_logsInputSchema).optional(),
   upsert: z.lazy(() => CravingLevelUpsertWithoutDaily_logsInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => CravingLevelWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => CravingLevelWhereInputSchema) ]).optional(),
   connect: z.lazy(() => CravingLevelWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => CravingLevelUpdateToOneWithWhereWithoutDaily_logsInputSchema), z.lazy(() => CravingLevelUpdateWithoutDaily_logsInputSchema), z.lazy(() => CravingLevelUncheckedUpdateWithoutDaily_logsInputSchema) ]).optional(),
 });
 
-export const EmotionalStateUpdateOneWithoutDaily_logsNestedInputSchema: z.ZodType<Prisma.EmotionalStateUpdateOneWithoutDaily_logsNestedInput> = z.strictObject({
+export const EmotionalStateUpdateOneRequiredWithoutDaily_logsNestedInputSchema: z.ZodType<Prisma.EmotionalStateUpdateOneRequiredWithoutDaily_logsNestedInput> = z.strictObject({
   create: z.union([ z.lazy(() => EmotionalStateCreateWithoutDaily_logsInputSchema), z.lazy(() => EmotionalStateUncheckedCreateWithoutDaily_logsInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => EmotionalStateCreateOrConnectWithoutDaily_logsInputSchema).optional(),
   upsert: z.lazy(() => EmotionalStateUpsertWithoutDaily_logsInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => EmotionalStateWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => EmotionalStateWhereInputSchema) ]).optional(),
   connect: z.lazy(() => EmotionalStateWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => EmotionalStateUpdateToOneWithWhereWithoutDaily_logsInputSchema), z.lazy(() => EmotionalStateUpdateWithoutDaily_logsInputSchema), z.lazy(() => EmotionalStateUncheckedUpdateWithoutDaily_logsInputSchema) ]).optional(),
 });
@@ -3780,16 +3683,8 @@ export const LogAbsenceUncheckedCreateNestedManyWithoutStreak_eventInputSchema: 
   connect: z.union([ z.lazy(() => LogAbsenceWhereUniqueInputSchema), z.lazy(() => LogAbsenceWhereUniqueInputSchema).array() ]).optional(),
 });
 
-export const NullableIntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableIntFieldUpdateOperationsInput> = z.strictObject({
-  set: z.number().optional().nullable(),
-  increment: z.number().optional(),
-  decrement: z.number().optional(),
-  multiply: z.number().optional(),
-  divide: z.number().optional(),
-});
-
-export const NullableDecimalFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableDecimalFieldUpdateOperationsInput> = z.strictObject({
-  set: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
+export const DecimalFieldUpdateOperationsInputSchema: z.ZodType<Prisma.DecimalFieldUpdateOperationsInput> = z.strictObject({
+  set: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   increment: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   decrement: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   multiply: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
@@ -3852,12 +3747,10 @@ export const UserUpdateOneRequiredWithoutAbsencesNestedInputSchema: z.ZodType<Pr
   update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutAbsencesInputSchema), z.lazy(() => UserUpdateWithoutAbsencesInputSchema), z.lazy(() => UserUncheckedUpdateWithoutAbsencesInputSchema) ]).optional(),
 });
 
-export const StreakEventUpdateOneWithoutAbsencesNestedInputSchema: z.ZodType<Prisma.StreakEventUpdateOneWithoutAbsencesNestedInput> = z.strictObject({
+export const StreakEventUpdateOneRequiredWithoutAbsencesNestedInputSchema: z.ZodType<Prisma.StreakEventUpdateOneRequiredWithoutAbsencesNestedInput> = z.strictObject({
   create: z.union([ z.lazy(() => StreakEventCreateWithoutAbsencesInputSchema), z.lazy(() => StreakEventUncheckedCreateWithoutAbsencesInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => StreakEventCreateOrConnectWithoutAbsencesInputSchema).optional(),
   upsert: z.lazy(() => StreakEventUpsertWithoutAbsencesInputSchema).optional(),
-  disconnect: z.union([ z.boolean(),z.lazy(() => StreakEventWhereInputSchema) ]).optional(),
-  delete: z.union([ z.boolean(),z.lazy(() => StreakEventWhereInputSchema) ]).optional(),
   connect: z.lazy(() => StreakEventWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => StreakEventUpdateToOneWithWhereWithoutAbsencesInputSchema), z.lazy(() => StreakEventUpdateWithoutAbsencesInputSchema), z.lazy(() => StreakEventUncheckedUpdateWithoutAbsencesInputSchema) ]).optional(),
 });
@@ -3999,20 +3892,6 @@ export const NestedStringFilterSchema: z.ZodType<Prisma.NestedStringFilter> = z.
   not: z.union([ z.string(),z.lazy(() => NestedStringFilterSchema) ]).optional(),
 });
 
-export const NestedStringNullableFilterSchema: z.ZodType<Prisma.NestedStringNullableFilter> = z.strictObject({
-  equals: z.string().optional().nullable(),
-  in: z.string().array().optional().nullable(),
-  notIn: z.string().array().optional().nullable(),
-  lt: z.string().optional(),
-  lte: z.string().optional(),
-  gt: z.string().optional(),
-  gte: z.string().optional(),
-  contains: z.string().optional(),
-  startsWith: z.string().optional(),
-  endsWith: z.string().optional(),
-  not: z.union([ z.string(),z.lazy(() => NestedStringNullableFilterSchema) ]).optional().nullable(),
-});
-
 export const NestedDateTimeFilterSchema: z.ZodType<Prisma.NestedDateTimeFilter> = z.strictObject({
   equals: z.coerce.date().optional(),
   in: z.coerce.date().array().optional(),
@@ -4064,34 +3943,6 @@ export const NestedStringWithAggregatesFilterSchema: z.ZodType<Prisma.NestedStri
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
   _min: z.lazy(() => NestedStringFilterSchema).optional(),
   _max: z.lazy(() => NestedStringFilterSchema).optional(),
-});
-
-export const NestedStringNullableWithAggregatesFilterSchema: z.ZodType<Prisma.NestedStringNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.string().optional().nullable(),
-  in: z.string().array().optional().nullable(),
-  notIn: z.string().array().optional().nullable(),
-  lt: z.string().optional(),
-  lte: z.string().optional(),
-  gt: z.string().optional(),
-  gte: z.string().optional(),
-  contains: z.string().optional(),
-  startsWith: z.string().optional(),
-  endsWith: z.string().optional(),
-  not: z.union([ z.string(),z.lazy(() => NestedStringNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedStringNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedStringNullableFilterSchema).optional(),
-});
-
-export const NestedIntNullableFilterSchema: z.ZodType<Prisma.NestedIntNullableFilter> = z.strictObject({
-  equals: z.number().optional().nullable(),
-  in: z.number().array().optional().nullable(),
-  notIn: z.number().array().optional().nullable(),
-  lt: z.number().optional(),
-  lte: z.number().optional(),
-  gt: z.number().optional(),
-  gte: z.number().optional(),
-  not: z.union([ z.number(),z.lazy(() => NestedIntNullableFilterSchema) ]).optional().nullable(),
 });
 
 export const NestedDateTimeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedDateTimeWithAggregatesFilter> = z.strictObject({
@@ -4148,129 +3999,52 @@ export const NestedBoolWithAggregatesFilterSchema: z.ZodType<Prisma.NestedBoolWi
   _max: z.lazy(() => NestedBoolFilterSchema).optional(),
 });
 
-export const NestedUuidNullableFilterSchema: z.ZodType<Prisma.NestedUuidNullableFilter> = z.strictObject({
-  equals: z.string().optional().nullable(),
-  in: z.string().array().optional().nullable(),
-  notIn: z.string().array().optional().nullable(),
-  lt: z.string().optional(),
-  lte: z.string().optional(),
-  gt: z.string().optional(),
-  gte: z.string().optional(),
-  not: z.union([ z.string(),z.lazy(() => NestedUuidNullableFilterSchema) ]).optional().nullable(),
-});
-
-export const NestedDateTimeNullableFilterSchema: z.ZodType<Prisma.NestedDateTimeNullableFilter> = z.strictObject({
-  equals: z.coerce.date().optional().nullable(),
-  in: z.coerce.date().array().optional().nullable(),
-  notIn: z.coerce.date().array().optional().nullable(),
-  lt: z.coerce.date().optional(),
-  lte: z.coerce.date().optional(),
-  gt: z.coerce.date().optional(),
-  gte: z.coerce.date().optional(),
-  not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeNullableFilterSchema) ]).optional().nullable(),
-});
-
-export const NestedUuidNullableWithAggregatesFilterSchema: z.ZodType<Prisma.NestedUuidNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.string().optional().nullable(),
-  in: z.string().array().optional().nullable(),
-  notIn: z.string().array().optional().nullable(),
-  lt: z.string().optional(),
-  lte: z.string().optional(),
-  gt: z.string().optional(),
-  gte: z.string().optional(),
-  not: z.union([ z.string(),z.lazy(() => NestedUuidNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedStringNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedStringNullableFilterSchema).optional(),
-});
-
-export const NestedDateTimeNullableWithAggregatesFilterSchema: z.ZodType<Prisma.NestedDateTimeNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.coerce.date().optional().nullable(),
-  in: z.coerce.date().array().optional().nullable(),
-  notIn: z.coerce.date().array().optional().nullable(),
-  lt: z.coerce.date().optional(),
-  lte: z.coerce.date().optional(),
-  gt: z.coerce.date().optional(),
-  gte: z.coerce.date().optional(),
-  not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedDateTimeNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedDateTimeNullableFilterSchema).optional(),
-});
-
-export const NestedDecimalNullableFilterSchema: z.ZodType<Prisma.NestedDecimalNullableFilter> = z.strictObject({
-  equals: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  in: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional().nullable(),
-  notIn: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional().nullable(),
+export const NestedDecimalFilterSchema: z.ZodType<Prisma.NestedDecimalFilter> = z.strictObject({
+  equals: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  in: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional(),
+  notIn: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional(),
   lt: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   lte: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   gt: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   gte: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
-  not: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NestedDecimalNullableFilterSchema) ]).optional().nullable(),
+  not: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NestedDecimalFilterSchema) ]).optional(),
 });
 
-export const NestedIntNullableWithAggregatesFilterSchema: z.ZodType<Prisma.NestedIntNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.number().optional().nullable(),
-  in: z.number().array().optional().nullable(),
-  notIn: z.number().array().optional().nullable(),
-  lt: z.number().optional(),
-  lte: z.number().optional(),
-  gt: z.number().optional(),
-  gte: z.number().optional(),
-  not: z.union([ z.number(),z.lazy(() => NestedIntNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _avg: z.lazy(() => NestedFloatNullableFilterSchema).optional(),
-  _sum: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-});
-
-export const NestedFloatNullableFilterSchema: z.ZodType<Prisma.NestedFloatNullableFilter> = z.strictObject({
-  equals: z.number().optional().nullable(),
-  in: z.number().array().optional().nullable(),
-  notIn: z.number().array().optional().nullable(),
-  lt: z.number().optional(),
-  lte: z.number().optional(),
-  gt: z.number().optional(),
-  gte: z.number().optional(),
-  not: z.union([ z.number(),z.lazy(() => NestedFloatNullableFilterSchema) ]).optional().nullable(),
-});
-
-export const NestedDecimalNullableWithAggregatesFilterSchema: z.ZodType<Prisma.NestedDecimalNullableWithAggregatesFilter> = z.strictObject({
-  equals: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  in: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional().nullable(),
-  notIn: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional().nullable(),
+export const NestedDecimalWithAggregatesFilterSchema: z.ZodType<Prisma.NestedDecimalWithAggregatesFilter> = z.strictObject({
+  equals: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  in: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional(),
+  notIn: z.union([z.number().array(),z.string().array(),z.instanceof(Prisma.Decimal).array(),DecimalJsLikeSchema.array(),]).refine((v) => Array.isArray(v) && (v as any[]).every((v) => isValidDecimalInput(v)), { message: 'Must be a Decimal' }).optional(),
   lt: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   lte: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   gt: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   gte: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
-  not: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NestedDecimalNullableWithAggregatesFilterSchema) ]).optional().nullable(),
-  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
-  _avg: z.lazy(() => NestedDecimalNullableFilterSchema).optional(),
-  _sum: z.lazy(() => NestedDecimalNullableFilterSchema).optional(),
-  _min: z.lazy(() => NestedDecimalNullableFilterSchema).optional(),
-  _max: z.lazy(() => NestedDecimalNullableFilterSchema).optional(),
+  not: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NestedDecimalWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _avg: z.lazy(() => NestedDecimalFilterSchema).optional(),
+  _sum: z.lazy(() => NestedDecimalFilterSchema).optional(),
+  _min: z.lazy(() => NestedDecimalFilterSchema).optional(),
+  _max: z.lazy(() => NestedDecimalFilterSchema).optional(),
 });
 
 export const UserAddictionCreateWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionCreateWithoutUserInput> = z.strictObject({
   id: z.uuid().optional(),
   custom_name: z.string(),
-  classification: z.string().optional().nullable(),
+  classification: z.string().optional(),
   is_active: z.boolean().optional(),
   registered_at: z.coerce.date().optional(),
   created_at: z.coerce.date().optional(),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutAddictionInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutAddictionInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertCreateNestedManyWithoutAddictionInputSchema).optional(),
 });
 
 export const UserAddictionUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUncheckedCreateWithoutUserInput> = z.strictObject({
   id: z.uuid().optional(),
   custom_name: z.string(),
-  classification: z.string().optional().nullable(),
+  classification: z.string().optional(),
   is_active: z.boolean().optional(),
   registered_at: z.coerce.date().optional(),
   created_at: z.coerce.date().optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutAddictionInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutAddictionInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedCreateNestedManyWithoutAddictionInputSchema).optional(),
 });
 
@@ -4279,12 +4053,17 @@ export const UserAddictionCreateOrConnectWithoutUserInputSchema: z.ZodType<Prism
   create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema) ]),
 });
 
+export const UserAddictionCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.UserAddictionCreateManyUserInputEnvelope> = z.strictObject({
+  data: z.union([ z.lazy(() => UserAddictionCreateManyUserInputSchema), z.lazy(() => UserAddictionCreateManyUserInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional(),
+});
+
 export const DailyLogCreateWithoutUserInputSchema: z.ZodType<Prisma.DailyLogCreateWithoutUserInput> = z.strictObject({
   id: z.uuid().optional(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
   craving_level: z.lazy(() => CravingLevelCreateNestedOneWithoutDaily_logsInputSchema).optional(),
   emotional_state: z.lazy(() => EmotionalStateCreateNestedOneWithoutDaily_logsInputSchema).optional(),
@@ -4294,10 +4073,10 @@ export const DailyLogUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.Dai
   id: z.uuid().optional(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  craving_level_id: z.string().optional().nullable(),
-  emotional_state_id: z.string().optional().nullable(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  craving_level_id: z.string().optional(),
+  emotional_state_id: z.string().optional(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -4314,20 +4093,20 @@ export const DailyLogCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.DailyLo
 export const SponsorshipCreateWithoutSponsorInputSchema: z.ZodType<Prisma.SponsorshipCreateWithoutSponsorInput> = z.strictObject({
   id: z.uuid().optional(),
   started_at: z.coerce.date().optional(),
-  ended_at: z.coerce.date().optional().nullable(),
+  ended_at: z.coerce.date().optional(),
   is_active: z.boolean().optional(),
-  termination_reason: z.string().optional().nullable(),
+  termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
   addict: z.lazy(() => UserCreateNestedOneWithoutSponsorships_as_addictInputSchema).optional(),
 });
 
 export const SponsorshipUncheckedCreateWithoutSponsorInputSchema: z.ZodType<Prisma.SponsorshipUncheckedCreateWithoutSponsorInput> = z.strictObject({
   id: z.uuid().optional(),
-  addict_id: z.string().optional().nullable(),
+  addict_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
-  ended_at: z.coerce.date().optional().nullable(),
+  ended_at: z.coerce.date().optional(),
   is_active: z.boolean().optional(),
-  termination_reason: z.string().optional().nullable(),
+  termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -4344,20 +4123,20 @@ export const SponsorshipCreateManySponsorInputEnvelopeSchema: z.ZodType<Prisma.S
 export const SponsorshipCreateWithoutAddictInputSchema: z.ZodType<Prisma.SponsorshipCreateWithoutAddictInput> = z.strictObject({
   id: z.uuid().optional(),
   started_at: z.coerce.date().optional(),
-  ended_at: z.coerce.date().optional().nullable(),
+  ended_at: z.coerce.date().optional(),
   is_active: z.boolean().optional(),
-  termination_reason: z.string().optional().nullable(),
+  termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
   sponsor: z.lazy(() => UserCreateNestedOneWithoutSponsorships_as_sponsorInputSchema).optional(),
 });
 
 export const SponsorshipUncheckedCreateWithoutAddictInputSchema: z.ZodType<Prisma.SponsorshipUncheckedCreateWithoutAddictInput> = z.strictObject({
   id: z.uuid().optional(),
-  sponsor_id: z.string().optional().nullable(),
+  sponsor_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
-  ended_at: z.coerce.date().optional().nullable(),
+  ended_at: z.coerce.date().optional(),
   is_active: z.boolean().optional(),
-  termination_reason: z.string().optional().nullable(),
+  termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -4374,12 +4153,12 @@ export const SponsorshipCreateManyAddictInputEnvelopeSchema: z.ZodType<Prisma.Sp
 export const SupportContactCreateWithoutUserInputSchema: z.ZodType<Prisma.SupportContactCreateWithoutUserInput> = z.strictObject({
   id: z.uuid().optional(),
   contact_name: z.string(),
-  phone: z.string().optional().nullable(),
-  email: z.string().optional().nullable(),
-  relationship: z.string().optional().nullable(),
-  custom_relationship: z.string().optional().nullable(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  relationship: z.string().optional(),
+  custom_relationship: z.string().optional(),
   is_active: z.boolean().optional(),
-  priority_order: z.number().int().optional().nullable(),
+  priority_order: z.number().int().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
 });
@@ -4387,12 +4166,12 @@ export const SupportContactCreateWithoutUserInputSchema: z.ZodType<Prisma.Suppor
 export const SupportContactUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.SupportContactUncheckedCreateWithoutUserInput> = z.strictObject({
   id: z.uuid().optional(),
   contact_name: z.string(),
-  phone: z.string().optional().nullable(),
-  email: z.string().optional().nullable(),
-  relationship: z.string().optional().nullable(),
-  custom_relationship: z.string().optional().nullable(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  relationship: z.string().optional(),
+  custom_relationship: z.string().optional(),
   is_active: z.boolean().optional(),
-  priority_order: z.number().int().optional().nullable(),
+  priority_order: z.number().int().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
 });
@@ -4411,7 +4190,7 @@ export const EmergencyAlertCreateWithoutUserInputSchema: z.ZodType<Prisma.Emerge
   id: z.uuid().optional(),
   activated_at: z.coerce.date().optional(),
   resulted_in_relapse: z.boolean().optional(),
-  resolution_notes: z.string().optional().nullable(),
+  resolution_notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
   addiction: z.lazy(() => UserAddictionCreateNestedOneWithoutAlertsInputSchema),
 });
@@ -4421,7 +4200,7 @@ export const EmergencyAlertUncheckedCreateWithoutUserInputSchema: z.ZodType<Pris
   user_addiction_id: z.string(),
   activated_at: z.coerce.date().optional(),
   resulted_in_relapse: z.boolean().optional(),
-  resolution_notes: z.string().optional().nullable(),
+  resolution_notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -4437,10 +4216,10 @@ export const EmergencyAlertCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.E
 
 export const StreakCreateWithoutUserInputSchema: z.ZodType<Prisma.StreakCreateWithoutUserInput> = z.strictObject({
   id: z.uuid().optional(),
-  status: z.string().optional().nullable(),
+  status: z.string().optional(),
   started_at: z.coerce.date(),
   day_counter: z.number().int().optional(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   addiction: z.lazy(() => UserAddictionCreateNestedOneWithoutStreakInputSchema),
   events: z.lazy(() => StreakEventCreateNestedManyWithoutStreakInputSchema).optional(),
@@ -4449,10 +4228,10 @@ export const StreakCreateWithoutUserInputSchema: z.ZodType<Prisma.StreakCreateWi
 export const StreakUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.StreakUncheckedCreateWithoutUserInput> = z.strictObject({
   id: z.uuid().optional(),
   user_addiction_id: z.string(),
-  status: z.string().optional().nullable(),
+  status: z.string().optional(),
   started_at: z.coerce.date(),
   day_counter: z.number().int().optional(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   events: z.lazy(() => StreakEventUncheckedCreateNestedManyWithoutStreakInputSchema).optional(),
 });
@@ -4462,12 +4241,17 @@ export const StreakCreateOrConnectWithoutUserInputSchema: z.ZodType<Prisma.Strea
   create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema) ]),
 });
 
+export const StreakCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.StreakCreateManyUserInputEnvelope> = z.strictObject({
+  data: z.union([ z.lazy(() => StreakCreateManyUserInputSchema), z.lazy(() => StreakCreateManyUserInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional(),
+});
+
 export const LogAbsenceCreateWithoutUserInputSchema: z.ZodType<Prisma.LogAbsenceCreateWithoutUserInput> = z.strictObject({
   id: z.uuid().optional(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   detected_at: z.coerce.date().optional(),
-  absence_hours: z.number().int().optional().nullable(),
+  absence_hours: z.number().int().optional(),
   event_generated: z.boolean().optional(),
   streak_event: z.lazy(() => StreakEventCreateNestedOneWithoutAbsencesInputSchema).optional(),
 });
@@ -4475,11 +4259,11 @@ export const LogAbsenceCreateWithoutUserInputSchema: z.ZodType<Prisma.LogAbsence
 export const LogAbsenceUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.LogAbsenceUncheckedCreateWithoutUserInput> = z.strictObject({
   id: z.uuid().optional(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   detected_at: z.coerce.date().optional(),
-  absence_hours: z.number().int().optional().nullable(),
+  absence_hours: z.number().int().optional(),
   event_generated: z.boolean().optional(),
-  streak_event_id: z.string().optional().nullable(),
+  streak_event_id: z.string().optional(),
 });
 
 export const LogAbsenceCreateOrConnectWithoutUserInputSchema: z.ZodType<Prisma.LogAbsenceCreateOrConnectWithoutUserInput> = z.strictObject({
@@ -4492,37 +4276,33 @@ export const LogAbsenceCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.LogAb
   skipDuplicates: z.boolean().optional(),
 });
 
-export const UserAddictionUpsertWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUpsertWithoutUserInput> = z.strictObject({
+export const UserAddictionUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUpsertWithWhereUniqueWithoutUserInput> = z.strictObject({
+  where: z.lazy(() => UserAddictionWhereUniqueInputSchema),
   update: z.union([ z.lazy(() => UserAddictionUpdateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedUpdateWithoutUserInputSchema) ]),
   create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema) ]),
-  where: z.lazy(() => UserAddictionWhereInputSchema).optional(),
 });
 
-export const UserAddictionUpdateToOneWithWhereWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUpdateToOneWithWhereWithoutUserInput> = z.strictObject({
-  where: z.lazy(() => UserAddictionWhereInputSchema).optional(),
+export const UserAddictionUpdateWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUpdateWithWhereUniqueWithoutUserInput> = z.strictObject({
+  where: z.lazy(() => UserAddictionWhereUniqueInputSchema),
   data: z.union([ z.lazy(() => UserAddictionUpdateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedUpdateWithoutUserInputSchema) ]),
 });
 
-export const UserAddictionUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUpdateWithoutUserInput> = z.strictObject({
-  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutAddictionNestedInputSchema).optional(),
-  alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutAddictionNestedInputSchema).optional(),
+export const UserAddictionUpdateManyWithWhereWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUpdateManyWithWhereWithoutUserInput> = z.strictObject({
+  where: z.lazy(() => UserAddictionScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => UserAddictionUpdateManyMutationInputSchema), z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserInputSchema) ]),
 });
 
-export const UserAddictionUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUncheckedUpdateWithoutUserInput> = z.strictObject({
-  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutAddictionNestedInputSchema).optional(),
-  alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutAddictionNestedInputSchema).optional(),
+export const UserAddictionScalarWhereInputSchema: z.ZodType<Prisma.UserAddictionScalarWhereInput> = z.strictObject({
+  AND: z.union([ z.lazy(() => UserAddictionScalarWhereInputSchema), z.lazy(() => UserAddictionScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => UserAddictionScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => UserAddictionScalarWhereInputSchema), z.lazy(() => UserAddictionScalarWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  custom_name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  classification: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
+  registered_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
+  created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
 });
 
 export const DailyLogUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.DailyLogUpsertWithWhereUniqueWithoutUserInput> = z.strictObject({
@@ -4549,10 +4329,10 @@ export const DailyLogScalarWhereInputSchema: z.ZodType<Prisma.DailyLogScalarWher
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   log_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   consumed: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  craving_level_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  emotional_state_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  triggers: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  notes: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  craving_level_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  emotional_state_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  triggers: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  notes: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
 });
 
@@ -4577,12 +4357,12 @@ export const SponsorshipScalarWhereInputSchema: z.ZodType<Prisma.SponsorshipScal
   OR: z.lazy(() => SponsorshipScalarWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => SponsorshipScalarWhereInputSchema), z.lazy(() => SponsorshipScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
-  sponsor_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  addict_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
+  sponsor_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  addict_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  ended_at: z.union([ z.lazy(() => DateTimeNullableFilterSchema), z.coerce.date() ]).optional().nullable(),
+  ended_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  termination_reason: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  termination_reason: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
 });
 
@@ -4625,12 +4405,12 @@ export const SupportContactScalarWhereInputSchema: z.ZodType<Prisma.SupportConta
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   contact_name: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
-  phone: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  email: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  relationship: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
-  custom_relationship: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  phone: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  email: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  relationship: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  custom_relationship: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  priority_order: z.union([ z.lazy(() => IntNullableFilterSchema), z.number() ]).optional().nullable(),
+  priority_order: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
 });
@@ -4660,41 +4440,38 @@ export const EmergencyAlertScalarWhereInputSchema: z.ZodType<Prisma.EmergencyAle
   user_addiction_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   activated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   resulted_in_relapse: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  resolution_notes: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  resolution_notes: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
 });
 
-export const StreakUpsertWithoutUserInputSchema: z.ZodType<Prisma.StreakUpsertWithoutUserInput> = z.strictObject({
+export const StreakUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.StreakUpsertWithWhereUniqueWithoutUserInput> = z.strictObject({
+  where: z.lazy(() => StreakWhereUniqueInputSchema),
   update: z.union([ z.lazy(() => StreakUpdateWithoutUserInputSchema), z.lazy(() => StreakUncheckedUpdateWithoutUserInputSchema) ]),
   create: z.union([ z.lazy(() => StreakCreateWithoutUserInputSchema), z.lazy(() => StreakUncheckedCreateWithoutUserInputSchema) ]),
-  where: z.lazy(() => StreakWhereInputSchema).optional(),
 });
 
-export const StreakUpdateToOneWithWhereWithoutUserInputSchema: z.ZodType<Prisma.StreakUpdateToOneWithWhereWithoutUserInput> = z.strictObject({
-  where: z.lazy(() => StreakWhereInputSchema).optional(),
+export const StreakUpdateWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.StreakUpdateWithWhereUniqueWithoutUserInput> = z.strictObject({
+  where: z.lazy(() => StreakWhereUniqueInputSchema),
   data: z.union([ z.lazy(() => StreakUpdateWithoutUserInputSchema), z.lazy(() => StreakUncheckedUpdateWithoutUserInputSchema) ]),
 });
 
-export const StreakUpdateWithoutUserInputSchema: z.ZodType<Prisma.StreakUpdateWithoutUserInput> = z.strictObject({
-  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addiction: z.lazy(() => UserAddictionUpdateOneRequiredWithoutStreakNestedInputSchema).optional(),
-  events: z.lazy(() => StreakEventUpdateManyWithoutStreakNestedInputSchema).optional(),
+export const StreakUpdateManyWithWhereWithoutUserInputSchema: z.ZodType<Prisma.StreakUpdateManyWithWhereWithoutUserInput> = z.strictObject({
+  where: z.lazy(() => StreakScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => StreakUpdateManyMutationInputSchema), z.lazy(() => StreakUncheckedUpdateManyWithoutUserInputSchema) ]),
 });
 
-export const StreakUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateWithoutUserInput> = z.strictObject({
-  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  events: z.lazy(() => StreakEventUncheckedUpdateManyWithoutStreakNestedInputSchema).optional(),
+export const StreakScalarWhereInputSchema: z.ZodType<Prisma.StreakScalarWhereInput> = z.strictObject({
+  AND: z.union([ z.lazy(() => StreakScalarWhereInputSchema), z.lazy(() => StreakScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => StreakScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => StreakScalarWhereInputSchema), z.lazy(() => StreakScalarWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  user_addiction_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  status: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
+  started_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
+  day_counter: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
+  last_log_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
+  updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
 });
 
 export const LogAbsenceUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.LogAbsenceUpsertWithWhereUniqueWithoutUserInput> = z.strictObject({
@@ -4720,19 +4497,19 @@ export const LogAbsenceScalarWhereInputSchema: z.ZodType<Prisma.LogAbsenceScalar
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   user_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   streak_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
-  last_log_date: z.union([ z.lazy(() => DateTimeNullableFilterSchema), z.coerce.date() ]).optional().nullable(),
+  last_log_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   detected_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  absence_hours: z.union([ z.lazy(() => IntNullableFilterSchema), z.number() ]).optional().nullable(),
+  absence_hours: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
   event_generated: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
-  streak_event_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
+  streak_event_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
 });
 
 export const DailyLogCreateWithoutCraving_levelInputSchema: z.ZodType<Prisma.DailyLogCreateWithoutCraving_levelInput> = z.strictObject({
   id: z.uuid().optional(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutDaily_logsInputSchema),
   emotional_state: z.lazy(() => EmotionalStateCreateNestedOneWithoutDaily_logsInputSchema).optional(),
@@ -4743,9 +4520,9 @@ export const DailyLogUncheckedCreateWithoutCraving_levelInputSchema: z.ZodType<P
   user_id: z.string(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  emotional_state_id: z.string().optional().nullable(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  emotional_state_id: z.string().optional(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -4779,8 +4556,8 @@ export const DailyLogCreateWithoutEmotional_stateInputSchema: z.ZodType<Prisma.D
   id: z.uuid().optional(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutDaily_logsInputSchema),
   craving_level: z.lazy(() => CravingLevelCreateNestedOneWithoutDaily_logsInputSchema).optional(),
@@ -4791,9 +4568,9 @@ export const DailyLogUncheckedCreateWithoutEmotional_stateInputSchema: z.ZodType
   user_id: z.string(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  craving_level_id: z.string().optional().nullable(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  craving_level_id: z.string().optional(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -4828,7 +4605,7 @@ export const UserCreateWithoutAddictionsInputSchema: z.ZodType<Prisma.UserCreate
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4836,7 +4613,7 @@ export const UserCreateWithoutAddictionsInputSchema: z.ZodType<Prisma.UserCreate
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -4845,7 +4622,7 @@ export const UserUncheckedCreateWithoutAddictionsInputSchema: z.ZodType<Prisma.U
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
@@ -4853,7 +4630,7 @@ export const UserUncheckedCreateWithoutAddictionsInputSchema: z.ZodType<Prisma.U
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -4864,10 +4641,10 @@ export const UserCreateOrConnectWithoutAddictionsInputSchema: z.ZodType<Prisma.U
 
 export const StreakCreateWithoutAddictionInputSchema: z.ZodType<Prisma.StreakCreateWithoutAddictionInput> = z.strictObject({
   id: z.uuid().optional(),
-  status: z.string().optional().nullable(),
+  status: z.string().optional(),
   started_at: z.coerce.date(),
   day_counter: z.number().int().optional(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutStreakInputSchema),
   events: z.lazy(() => StreakEventCreateNestedManyWithoutStreakInputSchema).optional(),
@@ -4876,10 +4653,10 @@ export const StreakCreateWithoutAddictionInputSchema: z.ZodType<Prisma.StreakCre
 export const StreakUncheckedCreateWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUncheckedCreateWithoutAddictionInput> = z.strictObject({
   id: z.uuid().optional(),
   user_id: z.string(),
-  status: z.string().optional().nullable(),
+  status: z.string().optional(),
   started_at: z.coerce.date(),
   day_counter: z.number().int().optional(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   events: z.lazy(() => StreakEventUncheckedCreateNestedManyWithoutStreakInputSchema).optional(),
 });
@@ -4889,11 +4666,16 @@ export const StreakCreateOrConnectWithoutAddictionInputSchema: z.ZodType<Prisma.
   create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema) ]),
 });
 
+export const StreakCreateManyAddictionInputEnvelopeSchema: z.ZodType<Prisma.StreakCreateManyAddictionInputEnvelope> = z.strictObject({
+  data: z.union([ z.lazy(() => StreakCreateManyAddictionInputSchema), z.lazy(() => StreakCreateManyAddictionInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional(),
+});
+
 export const EmergencyAlertCreateWithoutAddictionInputSchema: z.ZodType<Prisma.EmergencyAlertCreateWithoutAddictionInput> = z.strictObject({
   id: z.uuid().optional(),
   activated_at: z.coerce.date().optional(),
   resulted_in_relapse: z.boolean().optional(),
-  resolution_notes: z.string().optional().nullable(),
+  resolution_notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutAlertsInputSchema),
 });
@@ -4903,7 +4685,7 @@ export const EmergencyAlertUncheckedCreateWithoutAddictionInputSchema: z.ZodType
   user_id: z.string(),
   activated_at: z.coerce.date().optional(),
   resulted_in_relapse: z.boolean().optional(),
-  resolution_notes: z.string().optional().nullable(),
+  resolution_notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -4933,7 +4715,7 @@ export const UserUpdateWithoutAddictionsInputSchema: z.ZodType<Prisma.UserUpdate
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -4941,7 +4723,7 @@ export const UserUpdateWithoutAddictionsInputSchema: z.ZodType<Prisma.UserUpdate
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -4950,7 +4732,7 @@ export const UserUncheckedUpdateWithoutAddictionsInputSchema: z.ZodType<Prisma.U
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
@@ -4958,41 +4740,24 @@ export const UserUncheckedUpdateWithoutAddictionsInputSchema: z.ZodType<Prisma.U
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
-export const StreakUpsertWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUpsertWithoutAddictionInput> = z.strictObject({
+export const StreakUpsertWithWhereUniqueWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUpsertWithWhereUniqueWithoutAddictionInput> = z.strictObject({
+  where: z.lazy(() => StreakWhereUniqueInputSchema),
   update: z.union([ z.lazy(() => StreakUpdateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedUpdateWithoutAddictionInputSchema) ]),
   create: z.union([ z.lazy(() => StreakCreateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedCreateWithoutAddictionInputSchema) ]),
-  where: z.lazy(() => StreakWhereInputSchema).optional(),
 });
 
-export const StreakUpdateToOneWithWhereWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUpdateToOneWithWhereWithoutAddictionInput> = z.strictObject({
-  where: z.lazy(() => StreakWhereInputSchema).optional(),
+export const StreakUpdateWithWhereUniqueWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUpdateWithWhereUniqueWithoutAddictionInput> = z.strictObject({
+  where: z.lazy(() => StreakWhereUniqueInputSchema),
   data: z.union([ z.lazy(() => StreakUpdateWithoutAddictionInputSchema), z.lazy(() => StreakUncheckedUpdateWithoutAddictionInputSchema) ]),
 });
 
-export const StreakUpdateWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUpdateWithoutAddictionInput> = z.strictObject({
-  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  user: z.lazy(() => UserUpdateOneRequiredWithoutStreakNestedInputSchema).optional(),
-  events: z.lazy(() => StreakEventUpdateManyWithoutStreakNestedInputSchema).optional(),
-});
-
-export const StreakUncheckedUpdateWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateWithoutAddictionInput> = z.strictObject({
-  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  events: z.lazy(() => StreakEventUncheckedUpdateManyWithoutStreakNestedInputSchema).optional(),
+export const StreakUpdateManyWithWhereWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUpdateManyWithWhereWithoutAddictionInput> = z.strictObject({
+  where: z.lazy(() => StreakScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => StreakUpdateManyMutationInputSchema), z.lazy(() => StreakUncheckedUpdateManyWithoutAddictionInputSchema) ]),
 });
 
 export const EmergencyAlertUpsertWithWhereUniqueWithoutAddictionInputSchema: z.ZodType<Prisma.EmergencyAlertUpsertWithWhereUniqueWithoutAddictionInput> = z.strictObject({
@@ -5016,15 +4781,15 @@ export const UserCreateWithoutSponsorships_as_sponsorInputSchema: z.ZodType<Pris
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5033,15 +4798,15 @@ export const UserUncheckedCreateWithoutSponsorships_as_sponsorInputSchema: z.Zod
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5055,15 +4820,15 @@ export const UserCreateWithoutSponsorships_as_addictInputSchema: z.ZodType<Prism
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
   contacts: z.lazy(() => SupportContactCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5072,15 +4837,15 @@ export const UserUncheckedCreateWithoutSponsorships_as_addictInputSchema: z.ZodT
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5105,15 +4870,15 @@ export const UserUpdateWithoutSponsorships_as_sponsorInputSchema: z.ZodType<Pris
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5122,15 +4887,15 @@ export const UserUncheckedUpdateWithoutSponsorships_as_sponsorInputSchema: z.Zod
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5150,15 +4915,15 @@ export const UserUpdateWithoutSponsorships_as_addictInputSchema: z.ZodType<Prism
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5167,15 +4932,15 @@ export const UserUncheckedUpdateWithoutSponsorships_as_addictInputSchema: z.ZodT
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5184,15 +4949,15 @@ export const UserCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.UserCreate
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5201,15 +4966,15 @@ export const UserUncheckedCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.U
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5222,14 +4987,14 @@ export const CravingLevelCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.Cr
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
 });
 
 export const CravingLevelUncheckedCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.CravingLevelUncheckedCreateWithoutDaily_logsInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
 });
 
 export const CravingLevelCreateOrConnectWithoutDaily_logsInputSchema: z.ZodType<Prisma.CravingLevelCreateOrConnectWithoutDaily_logsInput> = z.strictObject({
@@ -5241,14 +5006,14 @@ export const EmotionalStateCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
 });
 
 export const EmotionalStateUncheckedCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.EmotionalStateUncheckedCreateWithoutDaily_logsInput> = z.strictObject({
   id: z.uuid().optional(),
   level: z.number().int(),
   label: z.string(),
-  description: z.string().optional().nullable(),
+  description: z.string().optional(),
 });
 
 export const EmotionalStateCreateOrConnectWithoutDaily_logsInputSchema: z.ZodType<Prisma.EmotionalStateCreateOrConnectWithoutDaily_logsInput> = z.strictObject({
@@ -5272,15 +5037,15 @@ export const UserUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.UserUpdate
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5289,15 +5054,15 @@ export const UserUncheckedUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.U
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5316,14 +5081,14 @@ export const CravingLevelUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.Cr
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const CravingLevelUncheckedUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.CravingLevelUncheckedUpdateWithoutDaily_logsInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const EmotionalStateUpsertWithoutDaily_logsInputSchema: z.ZodType<Prisma.EmotionalStateUpsertWithoutDaily_logsInput> = z.strictObject({
@@ -5341,22 +5106,22 @@ export const EmotionalStateUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const EmotionalStateUncheckedUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.EmotionalStateUncheckedUpdateWithoutDaily_logsInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   level: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   label: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  description: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const StreakCreateWithoutEventsInputSchema: z.ZodType<Prisma.StreakCreateWithoutEventsInput> = z.strictObject({
   id: z.uuid().optional(),
-  status: z.string().optional().nullable(),
+  status: z.string().optional(),
   started_at: z.coerce.date(),
   day_counter: z.number().int().optional(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutStreakInputSchema),
   addiction: z.lazy(() => UserAddictionCreateNestedOneWithoutStreakInputSchema),
@@ -5366,10 +5131,10 @@ export const StreakUncheckedCreateWithoutEventsInputSchema: z.ZodType<Prisma.Str
   id: z.uuid().optional(),
   user_id: z.string(),
   user_addiction_id: z.string(),
-  status: z.string().optional().nullable(),
+  status: z.string().optional(),
   started_at: z.coerce.date(),
   day_counter: z.number().int().optional(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
 });
 
@@ -5381,9 +5146,9 @@ export const StreakCreateOrConnectWithoutEventsInputSchema: z.ZodType<Prisma.Str
 export const LogAbsenceCreateWithoutStreak_eventInputSchema: z.ZodType<Prisma.LogAbsenceCreateWithoutStreak_eventInput> = z.strictObject({
   id: z.uuid().optional(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   detected_at: z.coerce.date().optional(),
-  absence_hours: z.number().int().optional().nullable(),
+  absence_hours: z.number().int().optional(),
   event_generated: z.boolean().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutAbsencesInputSchema),
 });
@@ -5392,9 +5157,9 @@ export const LogAbsenceUncheckedCreateWithoutStreak_eventInputSchema: z.ZodType<
   id: z.uuid().optional(),
   user_id: z.string(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   detected_at: z.coerce.date().optional(),
-  absence_hours: z.number().int().optional().nullable(),
+  absence_hours: z.number().int().optional(),
   event_generated: z.boolean().optional(),
 });
 
@@ -5421,10 +5186,10 @@ export const StreakUpdateToOneWithWhereWithoutEventsInputSchema: z.ZodType<Prism
 
 export const StreakUpdateWithoutEventsInputSchema: z.ZodType<Prisma.StreakUpdateWithoutEventsInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutStreakNestedInputSchema).optional(),
   addiction: z.lazy(() => UserAddictionUpdateOneRequiredWithoutStreakNestedInputSchema).optional(),
@@ -5434,10 +5199,10 @@ export const StreakUncheckedUpdateWithoutEventsInputSchema: z.ZodType<Prisma.Str
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  status: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -5462,16 +5227,16 @@ export const UserCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.UserCreateWi
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
 export const UserUncheckedCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutAbsencesInput> = z.strictObject({
@@ -5479,16 +5244,16 @@ export const UserUncheckedCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.Use
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
 export const UserCreateOrConnectWithoutAbsencesInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutAbsencesInput> = z.strictObject({
@@ -5498,12 +5263,12 @@ export const UserCreateOrConnectWithoutAbsencesInputSchema: z.ZodType<Prisma.Use
 
 export const StreakEventCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.StreakEventCreateWithoutAbsencesInput> = z.strictObject({
   id: z.uuid().optional(),
-  emergency_alert_id: z.string().optional().nullable(),
-  event_type: z.string().optional().nullable(),
+  emergency_alert_id: z.string().optional(),
+  event_type: z.string().optional(),
   event_date: z.coerce.date(),
-  days_achieved: z.number().int().optional().nullable(),
-  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
+  days_achieved: z.number().int().optional(),
+  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   created_at: z.coerce.date().optional(),
   streak: z.lazy(() => StreakCreateNestedOneWithoutEventsInputSchema),
 });
@@ -5511,12 +5276,12 @@ export const StreakEventCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.Strea
 export const StreakEventUncheckedCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.StreakEventUncheckedCreateWithoutAbsencesInput> = z.strictObject({
   id: z.uuid().optional(),
   streak_id: z.string(),
-  emergency_alert_id: z.string().optional().nullable(),
-  event_type: z.string().optional().nullable(),
+  emergency_alert_id: z.string().optional(),
+  event_type: z.string().optional(),
   event_date: z.coerce.date(),
-  days_achieved: z.number().int().optional().nullable(),
-  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
+  days_achieved: z.number().int().optional(),
+  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -5541,16 +5306,16 @@ export const UserUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.UserUpdateWi
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
 export const UserUncheckedUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutAbsencesInput> = z.strictObject({
@@ -5558,16 +5323,16 @@ export const UserUncheckedUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.Use
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
 export const StreakEventUpsertWithoutAbsencesInputSchema: z.ZodType<Prisma.StreakEventUpsertWithoutAbsencesInput> = z.strictObject({
@@ -5583,12 +5348,12 @@ export const StreakEventUpdateToOneWithWhereWithoutAbsencesInputSchema: z.ZodTyp
 
 export const StreakEventUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.StreakEventUpdateWithoutAbsencesInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emergency_alert_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  event_type: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  event_type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   event_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  days_achieved: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  days_achieved: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   streak: z.lazy(() => StreakUpdateOneRequiredWithoutEventsNestedInputSchema).optional(),
 });
@@ -5596,12 +5361,12 @@ export const StreakEventUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.Strea
 export const StreakEventUncheckedUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.StreakEventUncheckedUpdateWithoutAbsencesInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emergency_alert_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  event_type: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  event_type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   event_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  days_achieved: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  days_achieved: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -5610,15 +5375,15 @@ export const UserCreateWithoutContactsInputSchema: z.ZodType<Prisma.UserCreateWi
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5627,15 +5392,15 @@ export const UserUncheckedCreateWithoutContactsInputSchema: z.ZodType<Prisma.Use
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5660,15 +5425,15 @@ export const UserUpdateWithoutContactsInputSchema: z.ZodType<Prisma.UserUpdateWi
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5677,15 +5442,15 @@ export const UserUncheckedUpdateWithoutContactsInputSchema: z.ZodType<Prisma.Use
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
   alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5694,15 +5459,15 @@ export const UserCreateWithoutAlertsInputSchema: z.ZodType<Prisma.UserCreateWith
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5711,15 +5476,15 @@ export const UserUncheckedCreateWithoutAlertsInputSchema: z.ZodType<Prisma.UserU
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
 });
 
@@ -5731,23 +5496,23 @@ export const UserCreateOrConnectWithoutAlertsInputSchema: z.ZodType<Prisma.UserC
 export const UserAddictionCreateWithoutAlertsInputSchema: z.ZodType<Prisma.UserAddictionCreateWithoutAlertsInput> = z.strictObject({
   id: z.uuid().optional(),
   custom_name: z.string(),
-  classification: z.string().optional().nullable(),
+  classification: z.string().optional(),
   is_active: z.boolean().optional(),
   registered_at: z.coerce.date().optional(),
   created_at: z.coerce.date().optional(),
   user: z.lazy(() => UserCreateNestedOneWithoutAddictionsInputSchema),
-  streak: z.lazy(() => StreakCreateNestedOneWithoutAddictionInputSchema).optional(),
+  streak: z.lazy(() => StreakCreateNestedManyWithoutAddictionInputSchema).optional(),
 });
 
 export const UserAddictionUncheckedCreateWithoutAlertsInputSchema: z.ZodType<Prisma.UserAddictionUncheckedCreateWithoutAlertsInput> = z.strictObject({
   id: z.uuid().optional(),
   user_id: z.string(),
   custom_name: z.string(),
-  classification: z.string().optional().nullable(),
+  classification: z.string().optional(),
   is_active: z.boolean().optional(),
   registered_at: z.coerce.date().optional(),
   created_at: z.coerce.date().optional(),
-  streak: z.lazy(() => StreakUncheckedCreateNestedOneWithoutAddictionInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedCreateNestedManyWithoutAddictionInputSchema).optional(),
 });
 
 export const UserAddictionCreateOrConnectWithoutAlertsInputSchema: z.ZodType<Prisma.UserAddictionCreateOrConnectWithoutAlertsInput> = z.strictObject({
@@ -5771,15 +5536,15 @@ export const UserUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.UserUpdateWith
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5788,15 +5553,15 @@ export const UserUncheckedUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.UserU
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
   contacts: z.lazy(() => SupportContactUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
 });
 
@@ -5814,23 +5579,23 @@ export const UserAddictionUpdateToOneWithWhereWithoutAlertsInputSchema: z.ZodTyp
 export const UserAddictionUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.UserAddictionUpdateWithoutAlertsInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutAddictionsNestedInputSchema).optional(),
-  streak: z.lazy(() => StreakUpdateOneWithoutAddictionNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutAddictionNestedInputSchema).optional(),
 });
 
 export const UserAddictionUncheckedUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.UserAddictionUncheckedUpdateWithoutAlertsInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  streak: z.lazy(() => StreakUncheckedUpdateOneWithoutAddictionNestedInputSchema).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutAddictionNestedInputSchema).optional(),
 });
 
 export const UserCreateWithoutStreakInputSchema: z.ZodType<Prisma.UserCreateWithoutStreakInput> = z.strictObject({
@@ -5838,10 +5603,10 @@ export const UserCreateWithoutStreakInputSchema: z.ZodType<Prisma.UserCreateWith
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
@@ -5855,10 +5620,10 @@ export const UserUncheckedCreateWithoutStreakInputSchema: z.ZodType<Prisma.UserU
   name: z.string(),
   email: z.string(),
   password_hash: z.string(),
-  role: z.string().optional().nullable(),
+  role: z.string().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
@@ -5875,7 +5640,7 @@ export const UserCreateOrConnectWithoutStreakInputSchema: z.ZodType<Prisma.UserC
 export const UserAddictionCreateWithoutStreakInputSchema: z.ZodType<Prisma.UserAddictionCreateWithoutStreakInput> = z.strictObject({
   id: z.uuid().optional(),
   custom_name: z.string(),
-  classification: z.string().optional().nullable(),
+  classification: z.string().optional(),
   is_active: z.boolean().optional(),
   registered_at: z.coerce.date().optional(),
   created_at: z.coerce.date().optional(),
@@ -5887,7 +5652,7 @@ export const UserAddictionUncheckedCreateWithoutStreakInputSchema: z.ZodType<Pri
   id: z.uuid().optional(),
   user_id: z.string(),
   custom_name: z.string(),
-  classification: z.string().optional().nullable(),
+  classification: z.string().optional(),
   is_active: z.boolean().optional(),
   registered_at: z.coerce.date().optional(),
   created_at: z.coerce.date().optional(),
@@ -5901,24 +5666,24 @@ export const UserAddictionCreateOrConnectWithoutStreakInputSchema: z.ZodType<Pri
 
 export const StreakEventCreateWithoutStreakInputSchema: z.ZodType<Prisma.StreakEventCreateWithoutStreakInput> = z.strictObject({
   id: z.uuid().optional(),
-  emergency_alert_id: z.string().optional().nullable(),
-  event_type: z.string().optional().nullable(),
+  emergency_alert_id: z.string().optional(),
+  event_type: z.string().optional(),
   event_date: z.coerce.date(),
-  days_achieved: z.number().int().optional().nullable(),
-  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
+  days_achieved: z.number().int().optional(),
+  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   created_at: z.coerce.date().optional(),
   absences: z.lazy(() => LogAbsenceCreateNestedManyWithoutStreak_eventInputSchema).optional(),
 });
 
 export const StreakEventUncheckedCreateWithoutStreakInputSchema: z.ZodType<Prisma.StreakEventUncheckedCreateWithoutStreakInput> = z.strictObject({
   id: z.uuid().optional(),
-  emergency_alert_id: z.string().optional().nullable(),
-  event_type: z.string().optional().nullable(),
+  emergency_alert_id: z.string().optional(),
+  event_type: z.string().optional(),
   event_date: z.coerce.date(),
-  days_achieved: z.number().int().optional().nullable(),
-  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
+  days_achieved: z.number().int().optional(),
+  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   created_at: z.coerce.date().optional(),
   absences: z.lazy(() => LogAbsenceUncheckedCreateNestedManyWithoutStreak_eventInputSchema).optional(),
 });
@@ -5949,10 +5714,10 @@ export const UserUpdateWithoutStreakInputSchema: z.ZodType<Prisma.UserUpdateWith
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
@@ -5966,10 +5731,10 @@ export const UserUncheckedUpdateWithoutStreakInputSchema: z.ZodType<Prisma.UserU
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   password_hash: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  role: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addictions: z.lazy(() => UserAddictionUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
@@ -5992,7 +5757,7 @@ export const UserAddictionUpdateToOneWithWhereWithoutStreakInputSchema: z.ZodTyp
 export const UserAddictionUpdateWithoutStreakInputSchema: z.ZodType<Prisma.UserAddictionUpdateWithoutStreakInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -6004,7 +5769,7 @@ export const UserAddictionUncheckedUpdateWithoutStreakInputSchema: z.ZodType<Pri
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  classification: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -6033,55 +5798,64 @@ export const StreakEventScalarWhereInputSchema: z.ZodType<Prisma.StreakEventScal
   NOT: z.union([ z.lazy(() => StreakEventScalarWhereInputSchema), z.lazy(() => StreakEventScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   streak_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
-  emergency_alert_id: z.union([ z.lazy(() => UuidNullableFilterSchema), z.string() ]).optional().nullable(),
-  event_type: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
+  event_type: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   event_date: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  days_achieved: z.union([ z.lazy(() => IntNullableFilterSchema), z.number() ]).optional().nullable(),
-  avg_craving_period: z.union([ z.lazy(() => DecimalNullableFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.lazy(() => DecimalNullableFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional().nullable(),
+  days_achieved: z.union([ z.lazy(() => IntFilterSchema), z.number() ]).optional(),
+  avg_craving_period: z.union([ z.lazy(() => DecimalFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
+  avg_emotion_period: z.union([ z.lazy(() => DecimalFilterSchema), z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }) ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
+});
+
+export const UserAddictionCreateManyUserInputSchema: z.ZodType<Prisma.UserAddictionCreateManyUserInput> = z.strictObject({
+  id: z.uuid().optional(),
+  custom_name: z.string(),
+  classification: z.string().optional(),
+  is_active: z.boolean().optional(),
+  registered_at: z.coerce.date().optional(),
+  created_at: z.coerce.date().optional(),
 });
 
 export const DailyLogCreateManyUserInputSchema: z.ZodType<Prisma.DailyLogCreateManyUserInput> = z.strictObject({
   id: z.uuid().optional(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  craving_level_id: z.string().optional().nullable(),
-  emotional_state_id: z.string().optional().nullable(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  craving_level_id: z.string().optional(),
+  emotional_state_id: z.string().optional(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
 export const SponsorshipCreateManySponsorInputSchema: z.ZodType<Prisma.SponsorshipCreateManySponsorInput> = z.strictObject({
   id: z.uuid().optional(),
-  addict_id: z.string().optional().nullable(),
+  addict_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
-  ended_at: z.coerce.date().optional().nullable(),
+  ended_at: z.coerce.date().optional(),
   is_active: z.boolean().optional(),
-  termination_reason: z.string().optional().nullable(),
+  termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
 export const SponsorshipCreateManyAddictInputSchema: z.ZodType<Prisma.SponsorshipCreateManyAddictInput> = z.strictObject({
   id: z.uuid().optional(),
-  sponsor_id: z.string().optional().nullable(),
+  sponsor_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
-  ended_at: z.coerce.date().optional().nullable(),
+  ended_at: z.coerce.date().optional(),
   is_active: z.boolean().optional(),
-  termination_reason: z.string().optional().nullable(),
+  termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
 export const SupportContactCreateManyUserInputSchema: z.ZodType<Prisma.SupportContactCreateManyUserInput> = z.strictObject({
   id: z.uuid().optional(),
   contact_name: z.string(),
-  phone: z.string().optional().nullable(),
-  email: z.string().optional().nullable(),
-  relationship: z.string().optional().nullable(),
-  custom_relationship: z.string().optional().nullable(),
+  phone: z.string().optional(),
+  email: z.string().optional(),
+  relationship: z.string().optional(),
+  custom_relationship: z.string().optional(),
   is_active: z.boolean().optional(),
-  priority_order: z.number().int().optional().nullable(),
+  priority_order: z.number().int().optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
 });
@@ -6091,39 +5865,80 @@ export const EmergencyAlertCreateManyUserInputSchema: z.ZodType<Prisma.Emergency
   user_addiction_id: z.string(),
   activated_at: z.coerce.date().optional(),
   resulted_in_relapse: z.boolean().optional(),
-  resolution_notes: z.string().optional().nullable(),
+  resolution_notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
+});
+
+export const StreakCreateManyUserInputSchema: z.ZodType<Prisma.StreakCreateManyUserInput> = z.strictObject({
+  id: z.uuid().optional(),
+  user_addiction_id: z.string(),
+  status: z.string().optional(),
+  started_at: z.coerce.date(),
+  day_counter: z.number().int().optional(),
+  last_log_date: z.coerce.date().optional(),
+  updated_at: z.coerce.date().optional(),
 });
 
 export const LogAbsenceCreateManyUserInputSchema: z.ZodType<Prisma.LogAbsenceCreateManyUserInput> = z.strictObject({
   id: z.uuid().optional(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   detected_at: z.coerce.date().optional(),
-  absence_hours: z.number().int().optional().nullable(),
+  absence_hours: z.number().int().optional(),
   event_generated: z.boolean().optional(),
-  streak_event_id: z.string().optional().nullable(),
+  streak_event_id: z.string().optional(),
+});
+
+export const UserAddictionUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUpdateWithoutUserInput> = z.strictObject({
+  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  streak: z.lazy(() => StreakUpdateManyWithoutAddictionNestedInputSchema).optional(),
+  alerts: z.lazy(() => EmergencyAlertUpdateManyWithoutAddictionNestedInputSchema).optional(),
+});
+
+export const UserAddictionUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUncheckedUpdateWithoutUserInput> = z.strictObject({
+  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  streak: z.lazy(() => StreakUncheckedUpdateManyWithoutAddictionNestedInputSchema).optional(),
+  alerts: z.lazy(() => EmergencyAlertUncheckedUpdateManyWithoutAddictionNestedInputSchema).optional(),
+});
+
+export const UserAddictionUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma.UserAddictionUncheckedUpdateManyWithoutUserInput> = z.strictObject({
+  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  classification: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  registered_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const DailyLogUpdateWithoutUserInputSchema: z.ZodType<Prisma.DailyLogUpdateWithoutUserInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  craving_level: z.lazy(() => CravingLevelUpdateOneWithoutDaily_logsNestedInputSchema).optional(),
-  emotional_state: z.lazy(() => EmotionalStateUpdateOneWithoutDaily_logsNestedInputSchema).optional(),
+  craving_level: z.lazy(() => CravingLevelUpdateOneRequiredWithoutDaily_logsNestedInputSchema).optional(),
+  emotional_state: z.lazy(() => EmotionalStateUpdateOneRequiredWithoutDaily_logsNestedInputSchema).optional(),
 });
 
 export const DailyLogUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.DailyLogUncheckedUpdateWithoutUserInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  craving_level_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  emotional_state_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  craving_level_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  emotional_state_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -6131,82 +5946,82 @@ export const DailyLogUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  craving_level_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  emotional_state_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  craving_level_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  emotional_state_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const SponsorshipUpdateWithoutSponsorInputSchema: z.ZodType<Prisma.SponsorshipUpdateWithoutSponsorInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  addict: z.lazy(() => UserUpdateOneWithoutSponsorships_as_addictNestedInputSchema).optional(),
+  addict: z.lazy(() => UserUpdateOneRequiredWithoutSponsorships_as_addictNestedInputSchema).optional(),
 });
 
 export const SponsorshipUncheckedUpdateWithoutSponsorInputSchema: z.ZodType<Prisma.SponsorshipUncheckedUpdateWithoutSponsorInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  addict_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  addict_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const SponsorshipUncheckedUpdateManyWithoutSponsorInputSchema: z.ZodType<Prisma.SponsorshipUncheckedUpdateManyWithoutSponsorInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  addict_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  addict_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const SponsorshipUpdateWithoutAddictInputSchema: z.ZodType<Prisma.SponsorshipUpdateWithoutAddictInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  sponsor: z.lazy(() => UserUpdateOneWithoutSponsorships_as_sponsorNestedInputSchema).optional(),
+  sponsor: z.lazy(() => UserUpdateOneRequiredWithoutSponsorships_as_sponsorNestedInputSchema).optional(),
 });
 
 export const SponsorshipUncheckedUpdateWithoutAddictInputSchema: z.ZodType<Prisma.SponsorshipUncheckedUpdateWithoutAddictInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  sponsor_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  sponsor_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const SponsorshipUncheckedUpdateManyWithoutAddictInputSchema: z.ZodType<Prisma.SponsorshipUncheckedUpdateManyWithoutAddictInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  sponsor_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  sponsor_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  ended_at: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  termination_reason: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const SupportContactUpdateWithoutUserInputSchema: z.ZodType<Prisma.SupportContactUpdateWithoutUserInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   contact_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  email: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  custom_relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phone: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  priority_order: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  priority_order: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -6214,12 +6029,12 @@ export const SupportContactUpdateWithoutUserInputSchema: z.ZodType<Prisma.Suppor
 export const SupportContactUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.SupportContactUncheckedUpdateWithoutUserInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   contact_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  email: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  custom_relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phone: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  priority_order: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  priority_order: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -6227,12 +6042,12 @@ export const SupportContactUncheckedUpdateWithoutUserInputSchema: z.ZodType<Pris
 export const SupportContactUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma.SupportContactUncheckedUpdateManyWithoutUserInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   contact_name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phone: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  email: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  custom_relationship: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phone: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  custom_relationship: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  priority_order: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  priority_order: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -6241,7 +6056,7 @@ export const EmergencyAlertUpdateWithoutUserInputSchema: z.ZodType<Prisma.Emerge
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addiction: z.lazy(() => UserAddictionUpdateOneRequiredWithoutAlertsNestedInputSchema).optional(),
 });
@@ -6251,7 +6066,7 @@ export const EmergencyAlertUncheckedUpdateWithoutUserInputSchema: z.ZodType<Pris
   user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -6260,38 +6075,70 @@ export const EmergencyAlertUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<
   user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+});
+
+export const StreakUpdateWithoutUserInputSchema: z.ZodType<Prisma.StreakUpdateWithoutUserInput> = z.strictObject({
+  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  addiction: z.lazy(() => UserAddictionUpdateOneRequiredWithoutStreakNestedInputSchema).optional(),
+  events: z.lazy(() => StreakEventUpdateManyWithoutStreakNestedInputSchema).optional(),
+});
+
+export const StreakUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateWithoutUserInput> = z.strictObject({
+  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  events: z.lazy(() => StreakEventUncheckedUpdateManyWithoutStreakNestedInputSchema).optional(),
+});
+
+export const StreakUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateManyWithoutUserInput> = z.strictObject({
+  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  user_addiction_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const LogAbsenceUpdateWithoutUserInputSchema: z.ZodType<Prisma.LogAbsenceUpdateWithoutUserInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  streak_event: z.lazy(() => StreakEventUpdateOneWithoutAbsencesNestedInputSchema).optional(),
+  streak_event: z.lazy(() => StreakEventUpdateOneRequiredWithoutAbsencesNestedInputSchema).optional(),
 });
 
 export const LogAbsenceUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.LogAbsenceUncheckedUpdateWithoutUserInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  streak_event_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  streak_event_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const LogAbsenceUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Prisma.LogAbsenceUncheckedUpdateManyWithoutUserInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  streak_event_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  streak_event_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const DailyLogCreateManyCraving_levelInputSchema: z.ZodType<Prisma.DailyLogCreateManyCraving_levelInput> = z.strictObject({
@@ -6299,9 +6146,9 @@ export const DailyLogCreateManyCraving_levelInputSchema: z.ZodType<Prisma.DailyL
   user_id: z.string(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  emotional_state_id: z.string().optional().nullable(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  emotional_state_id: z.string().optional(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -6309,11 +6156,11 @@ export const DailyLogUpdateWithoutCraving_levelInputSchema: z.ZodType<Prisma.Dai
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutDaily_logsNestedInputSchema).optional(),
-  emotional_state: z.lazy(() => EmotionalStateUpdateOneWithoutDaily_logsNestedInputSchema).optional(),
+  emotional_state: z.lazy(() => EmotionalStateUpdateOneRequiredWithoutDaily_logsNestedInputSchema).optional(),
 });
 
 export const DailyLogUncheckedUpdateWithoutCraving_levelInputSchema: z.ZodType<Prisma.DailyLogUncheckedUpdateWithoutCraving_levelInput> = z.strictObject({
@@ -6321,9 +6168,9 @@ export const DailyLogUncheckedUpdateWithoutCraving_levelInputSchema: z.ZodType<P
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  emotional_state_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emotional_state_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -6332,9 +6179,9 @@ export const DailyLogUncheckedUpdateManyWithoutCraving_levelInputSchema: z.ZodTy
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  emotional_state_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emotional_state_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -6343,9 +6190,9 @@ export const DailyLogCreateManyEmotional_stateInputSchema: z.ZodType<Prisma.Dail
   user_id: z.string(),
   log_date: z.coerce.date(),
   consumed: z.boolean().optional(),
-  craving_level_id: z.string().optional().nullable(),
-  triggers: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  craving_level_id: z.string().optional(),
+  triggers: z.string().optional(),
+  notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
 
@@ -6353,11 +6200,11 @@ export const DailyLogUpdateWithoutEmotional_stateInputSchema: z.ZodType<Prisma.D
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutDaily_logsNestedInputSchema).optional(),
-  craving_level: z.lazy(() => CravingLevelUpdateOneWithoutDaily_logsNestedInputSchema).optional(),
+  craving_level: z.lazy(() => CravingLevelUpdateOneRequiredWithoutDaily_logsNestedInputSchema).optional(),
 });
 
 export const DailyLogUncheckedUpdateWithoutEmotional_stateInputSchema: z.ZodType<Prisma.DailyLogUncheckedUpdateWithoutEmotional_stateInput> = z.strictObject({
@@ -6365,9 +6212,9 @@ export const DailyLogUncheckedUpdateWithoutEmotional_stateInputSchema: z.ZodType
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  craving_level_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  craving_level_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -6376,10 +6223,20 @@ export const DailyLogUncheckedUpdateManyWithoutEmotional_stateInputSchema: z.Zod
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   consumed: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  craving_level_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  triggers: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  craving_level_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  triggers: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+});
+
+export const StreakCreateManyAddictionInputSchema: z.ZodType<Prisma.StreakCreateManyAddictionInput> = z.strictObject({
+  id: z.uuid().optional(),
+  user_id: z.string(),
+  status: z.string().optional(),
+  started_at: z.coerce.date(),
+  day_counter: z.number().int().optional(),
+  last_log_date: z.coerce.date().optional(),
+  updated_at: z.coerce.date().optional(),
 });
 
 export const EmergencyAlertCreateManyAddictionInputSchema: z.ZodType<Prisma.EmergencyAlertCreateManyAddictionInput> = z.strictObject({
@@ -6387,15 +6244,47 @@ export const EmergencyAlertCreateManyAddictionInputSchema: z.ZodType<Prisma.Emer
   user_id: z.string(),
   activated_at: z.coerce.date().optional(),
   resulted_in_relapse: z.boolean().optional(),
-  resolution_notes: z.string().optional().nullable(),
+  resolution_notes: z.string().optional(),
   created_at: z.coerce.date().optional(),
+});
+
+export const StreakUpdateWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUpdateWithoutAddictionInput> = z.strictObject({
+  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  user: z.lazy(() => UserUpdateOneRequiredWithoutStreakNestedInputSchema).optional(),
+  events: z.lazy(() => StreakEventUpdateManyWithoutStreakNestedInputSchema).optional(),
+});
+
+export const StreakUncheckedUpdateWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateWithoutAddictionInput> = z.strictObject({
+  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  events: z.lazy(() => StreakEventUncheckedUpdateManyWithoutStreakNestedInputSchema).optional(),
+});
+
+export const StreakUncheckedUpdateManyWithoutAddictionInputSchema: z.ZodType<Prisma.StreakUncheckedUpdateManyWithoutAddictionInput> = z.strictObject({
+  id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  day_counter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const EmergencyAlertUpdateWithoutAddictionInputSchema: z.ZodType<Prisma.EmergencyAlertUpdateWithoutAddictionInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutAlertsNestedInputSchema).optional(),
 });
@@ -6405,7 +6294,7 @@ export const EmergencyAlertUncheckedUpdateWithoutAddictionInputSchema: z.ZodType
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -6414,7 +6303,7 @@ export const EmergencyAlertUncheckedUpdateManyWithoutAddictionInputSchema: z.Zod
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   activated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   resulted_in_relapse: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
-  resolution_notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  resolution_notes: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -6422,18 +6311,18 @@ export const LogAbsenceCreateManyStreak_eventInputSchema: z.ZodType<Prisma.LogAb
   id: z.uuid().optional(),
   user_id: z.string(),
   streak_id: z.string(),
-  last_log_date: z.coerce.date().optional().nullable(),
+  last_log_date: z.coerce.date().optional(),
   detected_at: z.coerce.date().optional(),
-  absence_hours: z.number().int().optional().nullable(),
+  absence_hours: z.number().int().optional(),
   event_generated: z.boolean().optional(),
 });
 
 export const LogAbsenceUpdateWithoutStreak_eventInputSchema: z.ZodType<Prisma.LogAbsenceUpdateWithoutStreak_eventInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateOneRequiredWithoutAbsencesNestedInputSchema).optional(),
 });
@@ -6442,9 +6331,9 @@ export const LogAbsenceUncheckedUpdateWithoutStreak_eventInputSchema: z.ZodType<
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -6452,55 +6341,55 @@ export const LogAbsenceUncheckedUpdateManyWithoutStreak_eventInputSchema: z.ZodT
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   streak_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  last_log_date: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  last_log_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   detected_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  absence_hours: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  absence_hours: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   event_generated: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
 export const StreakEventCreateManyStreakInputSchema: z.ZodType<Prisma.StreakEventCreateManyStreakInput> = z.strictObject({
   id: z.uuid().optional(),
-  emergency_alert_id: z.string().optional().nullable(),
-  event_type: z.string().optional().nullable(),
+  emergency_alert_id: z.string().optional(),
+  event_type: z.string().optional(),
   event_date: z.coerce.date(),
-  days_achieved: z.number().int().optional().nullable(),
-  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
-  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional().nullable(),
+  days_achieved: z.number().int().optional(),
+  avg_craving_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
+  avg_emotion_period: z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }).optional(),
   created_at: z.coerce.date().optional(),
 });
 
 export const StreakEventUpdateWithoutStreakInputSchema: z.ZodType<Prisma.StreakEventUpdateWithoutStreakInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emergency_alert_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  event_type: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  event_type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   event_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  days_achieved: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  days_achieved: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   absences: z.lazy(() => LogAbsenceUpdateManyWithoutStreak_eventNestedInputSchema).optional(),
 });
 
 export const StreakEventUncheckedUpdateWithoutStreakInputSchema: z.ZodType<Prisma.StreakEventUncheckedUpdateWithoutStreakInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emergency_alert_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  event_type: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  event_type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   event_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  days_achieved: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  days_achieved: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   absences: z.lazy(() => LogAbsenceUncheckedUpdateManyWithoutStreak_eventNestedInputSchema).optional(),
 });
 
 export const StreakEventUncheckedUpdateManyWithoutStreakInputSchema: z.ZodType<Prisma.StreakEventUncheckedUpdateManyWithoutStreakInput> = z.strictObject({
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  emergency_alert_id: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  event_type: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  emergency_alert_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  event_type: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   event_date: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  days_achieved: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
-  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => NullableDecimalFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  days_achieved: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_craving_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
+  avg_emotion_period: z.union([ z.union([z.number(),z.string(),z.instanceof(Prisma.Decimal),DecimalJsLikeSchema,]).refine((v) => isValidDecimalInput(v), { message: 'Must be a Decimal' }),z.lazy(() => DecimalFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
 
@@ -7409,7 +7298,7 @@ export const UserAddictionDeleteManyArgsSchema: z.ZodType<Prisma.UserAddictionDe
 export const SponsorshipCreateArgsSchema: z.ZodType<Prisma.SponsorshipCreateArgs> = z.object({
   select: SponsorshipSelectSchema.optional(),
   include: SponsorshipIncludeSchema.optional(),
-  data: z.union([ SponsorshipCreateInputSchema, SponsorshipUncheckedCreateInputSchema ]).optional(),
+  data: z.union([ SponsorshipCreateInputSchema, SponsorshipUncheckedCreateInputSchema ]),
 }).strict();
 
 export const SponsorshipUpsertArgsSchema: z.ZodType<Prisma.SponsorshipUpsertArgs> = z.object({

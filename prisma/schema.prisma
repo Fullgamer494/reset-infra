@@ -21,17 +21,17 @@ model User {
   name          String   @db.VarChar(100)
   email         String   @unique @db.VarChar(150)
   password_hash String   @db.Text
-  role          String?  @db.VarChar(20)
+  role          String   @default("user") @db.VarChar(20)
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
 
-  addictions              UserAddiction?
+  addictions              UserAddiction[]
   daily_logs              DailyLog[]
   sponsorships_as_sponsor Sponsorship[]    @relation("SponsorRelation")
   sponsorships_as_addict  Sponsorship[]    @relation("AddictRelation")
   contacts                SupportContact[]
   alerts                  EmergencyAlert[]
-  streak                  Streak?
+  streak                  Streak[]
   absences                LogAbsence[]
 
   @@map("users")
@@ -45,7 +45,7 @@ model CravingLevel {
   id          String     @id @default(uuid()) @db.Uuid
   level       Int        @unique // El valor 1-10
   label       String     @db.VarChar(50)
-  description String?    @db.Text
+  description String     @default("") @db.Text
   daily_logs  DailyLog[]
 
   @@map("craving_levels")
@@ -56,7 +56,7 @@ model EmotionalState {
   id          String     @id @default(uuid()) @db.Uuid
   level       Int        @unique // El valor 1-10
   label       String     @db.VarChar(50)
-  description String?    @db.Text
+  description String     @default("") @db.Text
   daily_logs  DailyLog[]
 
   @@map("emotional_states")
@@ -67,13 +67,13 @@ model UserAddiction {
   id             String   @id @default(uuid()) @db.Uuid
   user_id        String   @unique @db.Uuid
   custom_name    String   @db.VarChar(100)
-  classification String?  @db.VarChar(50)
+  classification String   @default("") @db.VarChar(50)
   is_active      Boolean  @default(true)
   registered_at  DateTime @default(now())
   created_at     DateTime @default(now())
 
   user   User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  streak Streak?
+  streak Streak[]
   alerts EmergencyAlert[]
 
   @@map("user_addictions")
@@ -81,17 +81,17 @@ model UserAddiction {
 }
 
 model Sponsorship {
-  id                 String    @id @default(uuid()) @db.Uuid
-  sponsor_id         String?   @unique @db.Uuid
-  addict_id          String?   @unique @db.Uuid
-  started_at         DateTime  @default(now())
-  ended_at           DateTime?
-  is_active          Boolean   @default(true)
-  termination_reason String?   @db.Text
-  created_at         DateTime  @default(now())
+  id                 String   @id @default(uuid()) @db.Uuid
+  sponsor_id         String   @unique @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  addict_id          String   @unique @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  started_at         DateTime @default(now())
+  ended_at           DateTime @default("9999-12-31T23:59:59Z")
+  is_active          Boolean  @default(true)
+  termination_reason String   @default("") @db.Text
+  created_at         DateTime @default(now())
 
-  sponsor User? @relation("SponsorRelation", fields: [sponsor_id], references: [id])
-  addict  User? @relation("AddictRelation", fields: [addict_id], references: [id])
+  sponsor User @relation("SponsorRelation", fields: [sponsor_id], references: [id])
+  addict  User @relation("AddictRelation", fields: [addict_id], references: [id])
 
   @@map("sponsorships")
   @@schema("core")
@@ -105,15 +105,15 @@ model DailyLog {
   user_id            String   @db.Uuid
   log_date           DateTime @db.Date
   consumed           Boolean  @default(false)
-  craving_level_id   String?  @db.Uuid
-  emotional_state_id String?  @db.Uuid
-  triggers           String?  @db.Text
-  notes              String?  @db.Text
+  craving_level_id   String   @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  emotional_state_id String   @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  triggers           String   @default("") @db.Text
+  notes              String   @default("") @db.Text
   created_at         DateTime @default(now())
 
-  user            User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  craving_level   CravingLevel?   @relation(fields: [craving_level_id], references: [id])
-  emotional_state EmotionalState? @relation(fields: [emotional_state_id], references: [id])
+  user            User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  craving_level   CravingLevel   @relation(fields: [craving_level_id], references: [id])
+  emotional_state EmotionalState @relation(fields: [emotional_state_id], references: [id])
 
   @@unique([user_id, log_date])
   @@map("daily_logs")
@@ -123,12 +123,12 @@ model DailyLog {
 model StreakEvent {
   id                 String   @id @default(uuid()) @db.Uuid
   streak_id          String   @db.Uuid
-  emergency_alert_id String?  @db.Uuid
-  event_type         String?  @db.VarChar(20)
+  emergency_alert_id String   @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  event_type         String   @default("") @db.VarChar(20)
   event_date         DateTime
-  days_achieved      Int?
-  avg_craving_period Decimal? @db.Decimal(4, 2)
-  avg_emotion_period Decimal? @db.Decimal(4, 2)
+  days_achieved      Int      @default(0)
+  avg_craving_period Decimal  @default(0.0) @db.Decimal(4, 2)
+  avg_emotion_period Decimal  @default(0.0) @db.Decimal(4, 2)
   created_at         DateTime @default(now())
 
   streak   Streak       @relation(fields: [streak_id], references: [id], onDelete: Cascade)
@@ -139,17 +139,17 @@ model StreakEvent {
 }
 
 model LogAbsence {
-  id              String    @id @default(uuid()) @db.Uuid
-  user_id         String    @db.Uuid
-  streak_id       String    @db.Uuid
-  last_log_date   DateTime? @db.Date
-  detected_at     DateTime  @default(now())
-  absence_hours   Int?
-  event_generated Boolean   @default(false)
-  streak_event_id String?   @db.Uuid
+  id              String   @id @default(uuid()) @db.Uuid
+  user_id         String   @db.Uuid
+  streak_id       String   @db.Uuid
+  last_log_date   DateTime @default("1970-01-01T00:00:00Z") @db.Date
+  detected_at     DateTime @default(now())
+  absence_hours   Int      @default(0)
+  event_generated Boolean  @default(false)
+  streak_event_id String   @default("00000000-0000-0000-0000-000000000000") @db.Uuid
 
-  user         User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  streak_event StreakEvent? @relation(fields: [streak_event_id], references: [id])
+  user         User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  streak_event StreakEvent @relation(fields: [streak_event_id], references: [id])
 
   @@map("log_absences")
   @@schema("tracking")
@@ -162,12 +162,12 @@ model SupportContact {
   id                  String   @id @default(uuid()) @db.Uuid
   user_id             String   @db.Uuid
   contact_name        String   @db.VarChar(100)
-  phone               String?  @db.VarChar(20)
-  email               String?  @db.VarChar(150)
-  relationship        String?  @db.VarChar(50)
-  custom_relationship String?  @db.Text
+  phone               String   @default("") @db.VarChar(20)
+  email               String   @default("") @db.VarChar(150)
+  relationship        String   @default("") @db.VarChar(50)
+  custom_relationship String   @default("") @db.Text
   is_active           Boolean  @default(true)
-  priority_order      Int?
+  priority_order      Int      @default(0)
   created_at          DateTime @default(now())
   updated_at          DateTime @default(now()) @updatedAt
 
@@ -183,7 +183,7 @@ model EmergencyAlert {
   user_addiction_id   String   @db.Uuid
   activated_at        DateTime @default(now())
   resulted_in_relapse Boolean  @default(false)
-  resolution_notes    String?  @db.Text
+  resolution_notes    String   @default("") @db.Text
   created_at          DateTime @default(now())
 
   user      User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
@@ -194,14 +194,14 @@ model EmergencyAlert {
 }
 
 model Streak {
-  id                String    @id @default(uuid()) @db.Uuid
-  user_id           String    @unique @db.Uuid
-  user_addiction_id String    @unique @db.Uuid
-  status            String?   @db.VarChar(20)
+  id                String   @id @default(uuid()) @db.Uuid
+  user_id           String   @unique @db.Uuid
+  user_addiction_id String   @unique @db.Uuid
+  status            String   @default("") @db.VarChar(20)
   started_at        DateTime
-  day_counter       Int       @default(0)
-  last_log_date     DateTime? @db.Date
-  updated_at        DateTime  @default(now()) @updatedAt
+  day_counter       Int      @default(0)
+  last_log_date     DateTime @default("1970-01-01T00:00:00Z") @db.Date
+  updated_at        DateTime @default(now()) @updatedAt
 
   user      User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
   addiction UserAddiction @relation(fields: [user_addiction_id], references: [id], onDelete: Cascade)
