@@ -1,6 +1,6 @@
 {
   "name": "reset-infra",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "ReSet – Database infrastructure, Prisma migrations & Zod schema generation",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
