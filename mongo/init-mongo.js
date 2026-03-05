@@ -20,6 +20,7 @@ db.createCollection("posts", {
                 },
                 reactionUps: { bsonType: "int" },
                 commentCount: { bsonType: "int" },
+                reportCount: { bsonType: "int", description: "Cantidad de reportes" },
                 isDeleted: { bsonType: "bool", description: "Borrado lógico" },
                 isEdited: { bsonType: "bool", description: "Indica si la publicación fue editada" },
                 createdAt: { bsonType: "date" },
@@ -45,6 +46,7 @@ db.createCollection("comments", {
                 content: { bsonType: "string" },
                 isAnonymous: { bsonType: "bool" },
                 reactionUps: { bsonType: "int" },
+                reportCount: { bsonType: "int", description: "Cantidad de reportes" },
                 isDeleted: { bsonType: "bool", description: "Borrado lógico" },
                 isEdited: { bsonType: "bool", description: "Indica si el comentario fue editado" },
                 createdAt: { bsonType: "date" },
@@ -82,7 +84,7 @@ db.createCollection("reports", {
     validator: {
         $jsonSchema: {
             bsonType: "object",
-            required: ["reporterId", "targetId", "targetType", "reason", "status", "createdAt"],
+            required: ["reporterId", "targetId", "targetType", "reason", "createdAt"],
             properties: {
                 reporterId: { bsonType: "string" },
                 targetId: { bsonType: "objectId" },
@@ -94,10 +96,13 @@ db.createCollection("reports", {
                         "HATE_SPEECH",
                         "INAPPROPRIATE_CONTENT",
                         "OTHER"
-                    ]
+                    ],
+                    description: "Tipos de reporte predefinidos."
                 },
-                details: { bsonType: "string", description: "Detalles adicionales proporcionados por el usuario, especialmente útil para OTHER" },
-                status: { enum: ["PENDING", "REVIEWED", "RESOLVED", "REJECTED"] },
+                details: {
+                    bsonType: "string",
+                    description: "Campo abierto de texto sugerido para cuando el usuario selecciona OTHER u otro motivo y desea dar más contexto."
+                },
                 createdAt: { bsonType: "date" },
                 updatedAt: { bsonType: "date" }
             }
@@ -107,8 +112,9 @@ db.createCollection("reports", {
 
 // Índices para facilitar las consultas del panel de moderación
 db.reports.createIndex({ "targetId": 1, "targetType": 1 });
-db.reports.createIndex({ "status": 1 });
 db.reports.createIndex({ "createdAt": -1 });
+// Índice único para que un usuario solo pueda reportar una vez el mismo post o comentario
+db.reports.createIndex({ "targetId": 1, "targetType": 1, "reporterId": 1 }, { unique: true });
 
 db.createCollection("notifications", {
     validator: {
@@ -123,7 +129,11 @@ db.createCollection("notifications", {
                         "POST_REACTION",
                         "COMMENT_REACTION",
                         "POST_COMMENT",
-                        "COMMENT_REPLY"
+                        "COMMENT_REPLY",
+                        "POST_REPORTED",
+                        "COMMENT_REPORTED",
+                        "POST_DELETED_BY_REPORTS",
+                        "COMMENT_DELETED_BY_REPORTS"
                     ]
                 },
                 targetId: { bsonType: "objectId", description: "Referencia al post o comentario según el tipo" },
