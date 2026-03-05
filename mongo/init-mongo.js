@@ -20,6 +20,8 @@ db.createCollection("posts", {
                 },
                 reactionUps: { bsonType: "int" },
                 commentCount: { bsonType: "int" },
+                isDeleted: { bsonType: "bool", description: "Borrado lógico" },
+                isEdited: { bsonType: "bool", description: "Indica si la publicación fue editada" },
                 createdAt: { bsonType: "date" },
                 updatedAt: { bsonType: "date" }
             }
@@ -43,6 +45,8 @@ db.createCollection("comments", {
                 content: { bsonType: "string" },
                 isAnonymous: { bsonType: "bool" },
                 reactionUps: { bsonType: "int" },
+                isDeleted: { bsonType: "bool", description: "Borrado lógico" },
+                isEdited: { bsonType: "bool", description: "Indica si el comentario fue editado" },
                 createdAt: { bsonType: "date" },
                 updatedAt: { bsonType: "date" }
             }
@@ -53,3 +57,85 @@ db.createCollection("comments", {
 db.comments.createIndex({ "postId": 1, "createdAt": 1 });
 db.comments.createIndex({ "parentId": 1 });
 db.comments.createIndex({ "authorId": 1 });
+
+db.createCollection("reactions", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["userId", "targetId", "targetType", "createdAt"],
+            properties: {
+                userId: { bsonType: "string" },
+                targetId: { bsonType: "objectId" },
+                targetType: { enum: ["post", "comment"] },
+                createdAt: { bsonType: "date" }
+            }
+        }
+    }
+});
+
+// Índice único para asegurar que un usuario solo pueda reaccionar una vez a un mismo post o comentario
+db.reactions.createIndex({ "targetId": 1, "targetType": 1, "userId": 1 }, { unique: true });
+// Índice para buscar rápidamente todas las reacciones de un usuario
+db.reactions.createIndex({ "userId": 1 });
+
+db.createCollection("reports", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["reporterId", "targetId", "targetType", "reason", "status", "createdAt"],
+            properties: {
+                reporterId: { bsonType: "string" },
+                targetId: { bsonType: "objectId" },
+                targetType: { enum: ["post", "comment"] },
+                reason: {
+                    enum: [
+                        "SPAM",
+                        "HARASSMENT",
+                        "HATE_SPEECH",
+                        "INAPPROPRIATE_CONTENT",
+                        "OTHER"
+                    ]
+                },
+                details: { bsonType: "string", description: "Detalles adicionales proporcionados por el usuario, especialmente útil para OTHER" },
+                status: { enum: ["PENDING", "REVIEWED", "RESOLVED", "REJECTED"] },
+                createdAt: { bsonType: "date" },
+                updatedAt: { bsonType: "date" }
+            }
+        }
+    }
+});
+
+// Índices para facilitar las consultas del panel de moderación
+db.reports.createIndex({ "targetId": 1, "targetType": 1 });
+db.reports.createIndex({ "status": 1 });
+db.reports.createIndex({ "createdAt": -1 });
+
+db.createCollection("notifications", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["userId", "type", "isRead", "createdAt"],
+            properties: {
+                userId: { bsonType: "string", description: "ID del usuario que recibe la notificación" },
+                actorId: { bsonType: "string", description: "ID del usuario que originó la notificación (opcional)" },
+                type: {
+                    enum: [
+                        "POST_REACTION",
+                        "COMMENT_REACTION",
+                        "POST_COMMENT",
+                        "COMMENT_REPLY"
+                    ]
+                },
+                targetId: { bsonType: "objectId", description: "Referencia al post o comentario según el tipo" },
+                isRead: { bsonType: "bool" },
+                createdAt: { bsonType: "date" }
+            }
+        }
+    }
+});
+
+// Índices para obtener rápidamente las notificaciones de un usuario
+db.notifications.createIndex({ "userId": 1, "createdAt": -1 });
+// Índice para filtrar notificaciones no leídas
+db.notifications.createIndex({ "userId": 1, "isRead": 1 });
+

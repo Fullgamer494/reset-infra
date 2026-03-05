@@ -109,7 +109,7 @@ BEGIN
   LIMIT 1;
 
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'Usuario % no tiene adicciÃƒÂ³n activa registrada.', p_user_id;
+    RAISE EXCEPTION 'Usuario no tiene adicciónn activa registrada.', p_user_id;
   END IF;
 
   INSERT INTO emergency.emergency_alerts (user_id, user_addiction_id, activated_at)
@@ -158,7 +158,7 @@ $$;
 -- 5. core.fn_close_sponsorship
 CREATE OR REPLACE FUNCTION core.fn_close_sponsorship(
   p_sponsor_id UUID,
-  p_reason TEXT DEFAULT 'TerminaciÃƒÂ³n voluntaria'
+  p_reason TEXT DEFAULT 'Terminación voluntaria'
 )
 RETURNS BOOLEAN
 LANGUAGE plpgsql
@@ -295,3 +295,23 @@ INSERT INTO core.emotional_states (id, level, label, category, description) VALU
 (gen_random_uuid(), 9, 'Alegre / Motivado', 'Positiva', 'Estado 9'),
 (gen_random_uuid(), 10, 'Eufórico / Muy Feliz', 'Positiva', 'Estado 10')
 ON CONFLICT (level) DO NOTHING;
+
+-- =========================================================================
+-- Insertar Consultas Comunes en tabla queries para Benchmarking
+-- =========================================================================
+
+INSERT INTO queries (project_id, query_description, query_sql, target_table, query_type) VALUES
+(3, 'Registrar un nuevo daily log de estado emocional', 'INSERT INTO tracking.daily_logs (user_id, log_date, craving_level_id, emotional_state_id, consumed) VALUES ($1, $2, $3, $4, $5);', 'tracking.daily_logs', 'WRITE_OPERATION'),
+(3, 'Obtener racha activa de un usuario', 'SELECT * FROM core.streaks WHERE user_id = $1 AND status = ''active'' LIMIT 1;', 'core.streaks', 'SIMPLE_SELECT'),
+(3, 'Consultar contactos de emergencia activos', 'SELECT * FROM emergency.support_contacts WHERE user_id = $1 AND is_active = true;', 'emergency.support_contacts', 'SIMPLE_SELECT'),
+(3, 'Listar historial de logs integrando niveles y emociones', 'SELECT dl.*, cl.label, es.label FROM tracking.daily_logs dl JOIN core.craving_levels cl ON dl.craving_level_id = cl.id JOIN core.emotional_states es ON dl.emotional_state_id = es.id WHERE dl.user_id = $1 ORDER BY dl.log_date DESC;', 'tracking.daily_logs', 'JOIN'),
+(3, 'Obtener recuento de reincidencias agrupadas por estado', 'SELECT status, COUNT(*) FROM core.streaks GROUP BY status;', 'core.streaks', 'AGGREGATION'),
+(3, 'Consultar el último log de todos los usuarios (WF-01)', 'SELECT * FROM tracking.v_user_latest_log;', 'tracking.v_user_latest_log', 'WINDOW_FUNCTION'),
+(3, 'Consultar promedio móvil de craving de 7 días (WF-02)', 'SELECT * FROM tracking.v_user_craving_moving_avg WHERE user_id = $1;', 'tracking.v_user_craving_moving_avg', 'WINDOW_FUNCTION'),
+(3, 'Consultar ranking de mejores rachas por usuario (WF-03)', 'SELECT * FROM tracking.v_user_best_streaks WHERE user_id = $1;', 'tracking.v_user_best_streaks', 'WINDOW_FUNCTION'),
+(3, 'Actualizar racha del usuario al insertar/actualizar log (Trigger/UDF)', 'SELECT core.fn_update_streak();', 'core.streaks', 'WRITE_OPERATION'),
+(3, 'Detectar ausencias de logs diarios (UDF Cron/Job)', 'SELECT tracking.fn_detect_absence();', 'tracking.log_absences', 'WRITE_OPERATION'),
+(3, 'Disparar alerta de emergencia en botón de pánico (UDF)', 'SELECT emergency.fn_trigger_alert($1);', 'emergency.emergency_alerts', 'WRITE_OPERATION'),
+(3, 'Obtener estadísticas consolidadas del usuario (UDF con subqueries)', 'SELECT * FROM core.fn_get_user_stats($1);', 'core.streaks', 'SUBQUERY'),
+(3, 'Terminar o cerrar un patrocinio (UDF)', 'SELECT core.fn_close_sponsorship($1, $2);', 'core.sponsorships', 'WRITE_OPERATION'),
+(3, 'Exportar datos estadísticos de rendimiento (View)', 'SELECT * FROM v_daily_export;', 'v_daily_export', 'SIMPLE_SELECT');
