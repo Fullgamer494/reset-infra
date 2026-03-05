@@ -85,6 +85,31 @@ SELECT
   pss.temp_blks_written
 FROM pg_stat_statements pss
 INNER JOIN queries q 
-  ON REPLACE(LOWER(TRIM(TRAILING ';' FROM pss.query)), ' ', '') = 
-     REPLACE(LOWER(TRIM(TRAILING ';' FROM q.query_sql)), ' ', '')
+  -- Normalización agresiva:
+  -- 1. Convertir a minúsculas
+  -- 2. Eliminar todo el whitespace (espacios, saltos de línea, tabs)
+  -- 3. Eliminar comillas simples y dobles
+  -- 4. Eliminar parámetros formales ($1, $2...)
+  -- 5. Eliminar el casting a ::uuid
+  -- 6. Eliminar el punto y coma final
+  ON REGEXP_REPLACE(
+       REGEXP_REPLACE(
+         REGEXP_REPLACE(
+           REGEXP_REPLACE(LOWER(pss.query), '\s+|(::uuid)|["'']|;', '', 'g'),
+           '\$\d+', '', 'g'
+         ),
+         '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', '', 'g' -- Quitar UUIDs literales si los hay
+       ),
+       '\d{4}-\d{2}-\d{2}', '', 'g' -- Quitar fechas literales si las hay
+     ) = 
+     REGEXP_REPLACE(
+       REGEXP_REPLACE(
+         REGEXP_REPLACE(
+           REGEXP_REPLACE(LOWER(q.query_sql), '\s+|(::uuid)|["'']|;', '', 'g'),
+           '\$\d+', '', 'g'
+         ),
+         '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}', '', 'g'
+       ),
+       '\d{4}-\d{2}-\d{2}', '', 'g'
+     )
 WHERE pss.calls > 0;
