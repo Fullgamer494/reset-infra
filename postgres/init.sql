@@ -84,4 +84,7 @@ SELECT
   pss.temp_blks_read,
   pss.temp_blks_written
 FROM pg_stat_statements pss
+INNER JOIN queries q 
+  ON REPLACE(LOWER(TRIM(TRAILING ';' FROM pss.query)), ' ', '') = 
+     REPLACE(LOWER(TRIM(TRAILING ';' FROM q.query_sql)), ' ', '')
 WHERE pss.calls > 0;

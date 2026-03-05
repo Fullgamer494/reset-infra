@@ -301,17 +301,129 @@ ON CONFLICT (level) DO NOTHING;
 -- =========================================================================
 
 INSERT INTO queries (project_id, query_description, query_sql, target_table, query_type) VALUES
-(3, 'Registrar un nuevo daily log de estado emocional', 'INSERT INTO tracking.daily_logs (user_id, log_date, craving_level_id, emotional_state_id, consumed) VALUES ($1, $2, $3, $4, $5);', 'tracking.daily_logs', 'WRITE_OPERATION'),
-(3, 'Obtener racha activa de un usuario', 'SELECT * FROM core.streaks WHERE user_id = $1 AND status = ''active'' LIMIT 1;', 'core.streaks', 'SIMPLE_SELECT'),
-(3, 'Consultar contactos de emergencia activos', 'SELECT * FROM emergency.support_contacts WHERE user_id = $1 AND is_active = true;', 'emergency.support_contacts', 'SIMPLE_SELECT'),
-(3, 'Listar historial de logs integrando niveles y emociones', 'SELECT dl.*, cl.label, es.label FROM tracking.daily_logs dl JOIN core.craving_levels cl ON dl.craving_level_id = cl.id JOIN core.emotional_states es ON dl.emotional_state_id = es.id WHERE dl.user_id = $1 ORDER BY dl.log_date DESC;', 'tracking.daily_logs', 'JOIN'),
-(3, 'Obtener recuento de reincidencias agrupadas por estado', 'SELECT status, COUNT(*) FROM core.streaks GROUP BY status;', 'core.streaks', 'AGGREGATION'),
-(3, 'Consultar el último log de todos los usuarios (WF-01)', 'SELECT * FROM tracking.v_user_latest_log;', 'tracking.v_user_latest_log', 'WINDOW_FUNCTION'),
-(3, 'Consultar promedio móvil de craving de 7 días (WF-02)', 'SELECT * FROM tracking.v_user_craving_moving_avg WHERE user_id = $1;', 'tracking.v_user_craving_moving_avg', 'WINDOW_FUNCTION'),
-(3, 'Consultar ranking de mejores rachas por usuario (WF-03)', 'SELECT * FROM tracking.v_user_best_streaks WHERE user_id = $1;', 'tracking.v_user_best_streaks', 'WINDOW_FUNCTION'),
-(3, 'Actualizar racha del usuario al insertar/actualizar log (Trigger/UDF)', 'SELECT core.fn_update_streak();', 'core.streaks', 'WRITE_OPERATION'),
-(3, 'Detectar ausencias de logs diarios (UDF Cron/Job)', 'SELECT tracking.fn_detect_absence();', 'tracking.log_absences', 'WRITE_OPERATION'),
-(3, 'Disparar alerta de emergencia en botón de pánico (UDF)', 'SELECT emergency.fn_trigger_alert($1);', 'emergency.emergency_alerts', 'WRITE_OPERATION'),
-(3, 'Obtener estadísticas consolidadas del usuario (UDF con subqueries)', 'SELECT * FROM core.fn_get_user_stats($1);', 'core.streaks', 'SUBQUERY'),
-(3, 'Terminar o cerrar un patrocinio (UDF)', 'SELECT core.fn_close_sponsorship($1, $2);', 'core.sponsorships', 'WRITE_OPERATION'),
-(3, 'Exportar datos estadísticos de rendimiento (View)', 'SELECT * FROM v_daily_export;', 'v_daily_export', 'SIMPLE_SELECT');
+
+-- ==========================================
+-- AUTH
+-- ==========================================
+(3, 'Registrar nuevo usuario',
+'INSERT INTO auth.users (id, name, email, password_hash, role, created_at, updated_at) VALUES ($1, $2, $3, $4, ''user'', NOW(), NOW());',
+'auth.users', 'WRITE_OPERATION'),
+
+(3, 'Buscar usuario por email (login)',
+'SELECT id, name, email, password_hash, role, created_at, updated_at FROM auth.users WHERE email = $1 LIMIT 1;',
+'auth.users', 'SIMPLE_SELECT'),
+
+(3, 'Buscar usuario por ID (JWT guard / perfil)',
+'SELECT id, name, email, password_hash, role, created_at, updated_at FROM auth.users WHERE id = $1 LIMIT 1;',
+'auth.users', 'SIMPLE_SELECT'),
+
+-- ==========================================
+-- TRACKING — Daily Logs
+-- ==========================================
+(3, 'Registrar daily log del usuario',
+'INSERT INTO tracking.daily_logs (id, user_id, log_date, craving_level_id, emotional_state_id, consumed, triggers, notes, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW());',
+'tracking.daily_logs', 'WRITE_OPERATION'),
+
+(3, 'Listar historial de logs de un usuario con niveles y emociones',
+'SELECT dl.id, dl.user_id, dl.log_date, dl.consumed, dl.triggers, dl.notes, cl.level AS craving_level, cl.label AS craving_label, es.level AS emotional_level, es.label AS emotional_label, dl.created_at FROM tracking.daily_logs dl LEFT JOIN core.craving_levels cl ON cl.id = dl.craving_level_id LEFT JOIN core.emotional_states es ON es.id = dl.emotional_state_id WHERE dl.user_id = $1 ORDER BY dl.log_date DESC;',
+'tracking.daily_logs', 'JOIN'),
+
+(3, 'Obtener último log del usuario autenticado (WF-01)',
+'SELECT * FROM tracking.v_user_latest_log WHERE user_id = $1;',
+'tracking.v_user_latest_log', 'WINDOW_FUNCTION'),
+
+(3, 'Obtener promedio móvil de craving y emoción 7 días (WF-02)',
+'SELECT * FROM tracking.v_user_craving_moving_avg WHERE user_id = $1;',
+'tracking.v_user_craving_moving_avg', 'WINDOW_FUNCTION'),
+
+(3, 'Obtener estadísticas consolidadas del usuario via UDF',
+'SELECT * FROM core.fn_get_user_stats($1::uuid);',
+'core.streaks', 'SUBQUERY'),
+
+-- ==========================================
+-- STREAK
+-- ==========================================
+(3, 'Obtener racha activa del usuario',
+'SELECT * FROM core.streaks WHERE user_id = $1 AND status = ''active'' LIMIT 1;',
+'core.streaks', 'SIMPLE_SELECT'),
+
+(3, 'Crear racha inicial para un usuario',
+'INSERT INTO core.streaks (id, user_id, user_addiction_id, status, day_counter, last_log_date, created_at, updated_at) VALUES ($1, $2, $3, ''active'', 0, NULL, NOW(), NOW());',
+'core.streaks', 'WRITE_OPERATION'),
+
+(3, 'Obtener ranking de mejores rachas del usuario (WF-03)',
+'SELECT * FROM tracking.v_user_best_streaks WHERE user_id = $1;',
+'tracking.v_user_best_streaks', 'WINDOW_FUNCTION'),
+
+(3, 'Detectar ausencias de logs diarios — Cron Job',
+'SELECT tracking.fn_detect_absence();',
+'tracking.log_absences', 'WRITE_OPERATION'),
+
+(3, 'Actualizar racha al insertar daily log — Trigger/UDF',
+'SELECT core.fn_update_streak();',
+'core.streaks', 'WRITE_OPERATION'),
+
+-- ==========================================
+-- EMERGENCY
+-- ==========================================
+(3, 'Registrar contacto de emergencia',
+'INSERT INTO emergency.support_contacts (id, user_id, name, relationship, phone_number, email, priority_level, is_active, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, NOW(), NOW());',
+'emergency.support_contacts', 'WRITE_OPERATION'),
+
+(3, 'Listar contactos de emergencia activos de un usuario',
+'SELECT id, user_id, name, relationship, phone_number, email, priority_level, is_active, created_at FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_level ASC, created_at ASC;',
+'emergency.support_contacts', 'SIMPLE_SELECT'),
+
+(3, 'Actualizar contacto de emergencia',
+'UPDATE emergency.support_contacts SET name = COALESCE($2, name), relationship = COALESCE($3, relationship), phone_number = COALESCE($4, phone_number), email = COALESCE($5, email), priority_level = COALESCE($6, priority_level), is_active = COALESCE($7, is_active), updated_at = NOW() WHERE id = $1;',
+'emergency.support_contacts', 'WRITE_OPERATION'),
+
+(3, 'Disparar alerta de emergencia — Botón de pánico (UDF)',
+'SELECT emergency.fn_trigger_alert($1::uuid) AS alert_id;',
+'emergency.emergency_alerts', 'WRITE_OPERATION'),
+
+(3, 'Obtener contactos activos tras alerta para envío de notificaciones',
+'SELECT id, user_id, name, email, phone_number, priority_level FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_level ASC;',
+'emergency.support_contacts', 'SIMPLE_SELECT'),
+
+-- ==========================================
+-- SPONSORSHIP
+-- ==========================================
+(3, 'Terminar patrocinio activo via UDF',
+'SELECT core.fn_close_sponsorship($1::uuid, $2) AS success;',
+'core.sponsorships', 'WRITE_OPERATION'),
+
+-- ==========================================
+-- ADMIN METRICS
+-- ==========================================
+(3, 'Totales globales del sistema (overview)',
+'SELECT (SELECT COUNT(*) FROM auth.users) AS total_users, (SELECT COUNT(*) FROM tracking.daily_logs) AS total_logs, (SELECT COUNT(*) FROM core.streaks WHERE status = ''active'') AS active_streaks, (SELECT COUNT(*) FROM core.streaks WHERE status = ''broken'') AS broken_streaks;',
+'auth.users', 'AGGREGATION'),
+
+(3, 'Frecuencia diaria de logs con consumo y usuarios únicos',
+'SELECT dl.log_date, COUNT(*) AS total_logs, COUNT(DISTINCT dl.user_id) AS unique_users, SUM(CASE WHEN dl.consumed = TRUE THEN 1 ELSE 0 END) AS consumed_count, SUM(CASE WHEN dl.consumed = FALSE THEN 1 ELSE 0 END) AS clean_count FROM tracking.daily_logs dl WHERE dl.log_date BETWEEN $1 AND $2 GROUP BY dl.log_date ORDER BY dl.log_date ASC;',
+'tracking.daily_logs', 'AGGREGATION'),
+
+(3, 'Engagement del foro por día (posts, comentarios, reacciones, usuarios únicos)',
+'SELECT DATE(p.created_at) AS day, COUNT(DISTINCT p._id) AS posts, COUNT(DISTINCT c._id) AS comments, COUNT(DISTINCT r._id) AS reactions, COUNT(DISTINCT p.author_id) AS unique_users FROM posts p LEFT JOIN comments c ON c.post_id = p._id LEFT JOIN reactions r ON r.target_id = p._id WHERE p.created_at BETWEEN $1 AND $2 GROUP BY DATE(p.created_at) ORDER BY day ASC;',
+'posts', 'AGGREGATION'),
+
+(3, 'Correlación foro vs no-foro: avg logs, craving, emoción, racha, tasa de recaída',
+'SELECT uses_forum, ROUND(AVG(log_count), 2) AS avg_logs, ROUND(AVG(avg_craving), 2) AS avg_craving, ROUND(AVG(avg_emotion), 2) AS avg_emotion, ROUND(AVG(day_counter), 2) AS avg_streak_days, ROUND(AVG(relapse_rate), 4) AS avg_relapse_rate FROM (SELECT u.id, EXISTS(SELECT 1 FROM posts p WHERE p.author_id = u.id::text) AS uses_forum, COUNT(dl.id) AS log_count, AVG(cl.level) AS avg_craving, AVG(es.level) AS avg_emotion, COALESCE(s.day_counter, 0) AS day_counter, COALESCE((SELECT COUNT(*) FROM tracking.streak_events se WHERE se.streak_id = s.id AND se.event_type = ''relapse''), 0)::NUMERIC / NULLIF(s.day_counter, 0) AS relapse_rate FROM auth.users u LEFT JOIN tracking.daily_logs dl ON dl.user_id = u.id AND dl.log_date BETWEEN $1 AND $2 LEFT JOIN core.craving_levels cl ON cl.id = dl.craving_level_id LEFT JOIN core.emotional_states es ON es.id = dl.emotional_state_id LEFT JOIN core.streaks s ON s.user_id = u.id AND s.status = ''active'' GROUP BY u.id, s.id, s.day_counter) sub GROUP BY uses_forum;',
+'auth.users', 'SUBQUERY'),
+
+(3, 'Métricas de logs segmentadas por tipo de adicción',
+'SELECT ua.classification, ua.custom_name AS addiction_name, COUNT(dl.id) AS total_logs, ROUND(AVG(cl.level), 2) AS avg_craving, ROUND(AVG(es.level), 2) AS avg_emotion, SUM(CASE WHEN dl.consumed = TRUE THEN 1 ELSE 0 END) AS relapses FROM core.user_addictions ua LEFT JOIN core.streaks s ON s.user_addiction_id = ua.id LEFT JOIN tracking.daily_logs dl ON dl.user_id = ua.user_id AND dl.log_date BETWEEN $1 AND $2 LEFT JOIN core.craving_levels cl ON cl.id = dl.craving_level_id LEFT JOIN core.emotional_states es ON es.id = dl.emotional_state_id GROUP BY ua.classification, ua.custom_name ORDER BY ua.classification, total_logs DESC;',
+'core.user_addictions', 'AGGREGATION'),
+
+(3, 'Evolución temporal de promedios de craving y emoción por semana',
+'SELECT DATE_TRUNC(''week'', dl.log_date) AS week, ROUND(AVG(cl.level), 2) AS avg_craving, ROUND(AVG(es.level), 2) AS avg_emotion, COUNT(*) AS total_logs FROM tracking.daily_logs dl LEFT JOIN core.craving_levels cl ON cl.id = dl.craving_level_id LEFT JOIN core.emotional_states es ON es.id = dl.emotional_state_id WHERE dl.log_date BETWEEN $1 AND $2 GROUP BY DATE_TRUNC(''week'', dl.log_date) ORDER BY week ASC;',
+'tracking.daily_logs', 'AGGREGATION'),
+
+(3, 'Resumen de rachas: activas, rotas, promedio días, tasa de recaída',
+'SELECT s.status, COUNT(*) AS total, ROUND(AVG(s.day_counter), 2) AS avg_days, SUM(CASE WHEN s.day_counter BETWEEN 0 AND 7 THEN 1 ELSE 0 END) AS range_0_7, SUM(CASE WHEN s.day_counter BETWEEN 8 AND 14 THEN 1 ELSE 0 END) AS range_8_14, SUM(CASE WHEN s.day_counter BETWEEN 15 AND 30 THEN 1 ELSE 0 END) AS range_15_30, SUM(CASE WHEN s.day_counter > 30 THEN 1 ELSE 0 END) AS range_31_plus FROM core.streaks s GROUP BY s.status;',
+'core.streaks', 'AGGREGATION'),
+
+(3, 'Reportes del foro agrupados por razón, estado y tipo de target',
+'SELECT reason, status, target_type, COUNT(*) AS total FROM reports WHERE created_at BETWEEN $1 AND $2 GROUP BY reason, status, target_type ORDER BY total DESC;',
+'reports', 'AGGREGATION');
