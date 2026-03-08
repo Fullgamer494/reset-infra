@@ -133,7 +133,9 @@ db.createCollection("notifications", {
                         "POST_REPORTED",
                         "COMMENT_REPORTED",
                         "POST_DELETED_BY_REPORTS",
-                        "COMMENT_DELETED_BY_REPORTS"
+                        "COMMENT_DELETED_BY_REPORTS",
+                        "SPONSORSHIP_REQUEST",
+                        "SPONSORSHIP_ACCEPTED"
                     ]
                 },
                 targetId: { bsonType: "objectId", description: "Referencia al post o comentario según el tipo" },

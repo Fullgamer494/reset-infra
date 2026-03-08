@@ -8,4 +8,3 @@
  */
 
 export * from './schemas/index.js';
-export * from './schemas/mongo.js';

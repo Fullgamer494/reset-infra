@@ -33,7 +33,7 @@ export const isValidDecimalInput =
 
 export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCommitted','RepeatableRead','Serializable']);
 
-export const UserScalarFieldEnumSchema = z.enum(['id','name','email','password_hash','role','created_at','updated_at']);
+export const UserScalarFieldEnumSchema = z.enum(['id','name','email','password_hash','role','created_at','updated_at','sponsor_code']);
 
 export const CravingLevelScalarFieldEnumSchema = z.enum(['id','level','label','description','recommendation']);
 
@@ -41,7 +41,7 @@ export const EmotionalStateScalarFieldEnumSchema = z.enum(['id','level','label',
 
 export const UserAddictionScalarFieldEnumSchema = z.enum(['id','user_id','custom_name','classification','is_active','registered_at','created_at']);
 
-export const SponsorshipScalarFieldEnumSchema = z.enum(['id','sponsor_id','addict_id','started_at','ended_at','is_active','termination_reason','created_at']);
+export const SponsorshipScalarFieldEnumSchema = z.enum(['id','sponsor_id','addict_id','started_at','ended_at','status','termination_reason','created_at']);
 
 export const DailyLogScalarFieldEnumSchema = z.enum(['id','user_id','log_date','consumed','craving_level_id','emotional_state_id','triggers','notes','created_at']);
 
@@ -59,9 +59,15 @@ export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const QueryModeSchema = z.enum(['default','insensitive']);
 
+export const NullsOrderSchema = z.enum(['first','last']);
+
 export const UserRoleSchema = z.enum(['ADICTO','PADRINO','ADMIN']);
 
 export type UserRoleType = `${z.infer<typeof UserRoleSchema>}`
+
+export const SponsorshipStatusSchema = z.enum(['PENDING','ACTIVE','INACTIVE']);
+
+export type SponsorshipStatusType = `${z.infer<typeof SponsorshipStatusSchema>}`
 
 /////////////////////////////////////////
 // MODELS
@@ -79,6 +85,7 @@ export const UserSchema = z.object({
   password_hash: z.string(),
   created_at: z.coerce.date(),
   updated_at: z.coerce.date(),
+  sponsor_code: z.string().nullable(),
 })
 
 export type User = z.infer<typeof UserSchema>
@@ -132,12 +139,12 @@ export type UserAddiction = z.infer<typeof UserAddictionSchema>
 /////////////////////////////////////////
 
 export const SponsorshipSchema = z.object({
+  status: SponsorshipStatusSchema,
   id: z.uuid(),
   sponsor_id: z.string(),
   addict_id: z.string(),
   started_at: z.coerce.date(),
   ended_at: z.coerce.date(),
-  is_active: z.boolean(),
   termination_reason: z.string(),
   created_at: z.coerce.date(),
 })
@@ -297,6 +304,7 @@ export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
   role: z.boolean().optional(),
   created_at: z.boolean().optional(),
   updated_at: z.boolean().optional(),
+  sponsor_code: z.boolean().optional(),
   addictions: z.union([z.boolean(),z.lazy(() => UserAddictionFindManyArgsSchema)]).optional(),
   daily_logs: z.union([z.boolean(),z.lazy(() => DailyLogFindManyArgsSchema)]).optional(),
   sponsorships_as_sponsor: z.union([z.boolean(),z.lazy(() => SponsorshipFindManyArgsSchema)]).optional(),
@@ -427,7 +435,7 @@ export const SponsorshipSelectSchema: z.ZodType<Prisma.SponsorshipSelect> = z.ob
   addict_id: z.boolean().optional(),
   started_at: z.boolean().optional(),
   ended_at: z.boolean().optional(),
-  is_active: z.boolean().optional(),
+  status: z.boolean().optional(),
   termination_reason: z.boolean().optional(),
   created_at: z.boolean().optional(),
   sponsor: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
@@ -632,6 +640,7 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.strictOb
   role: z.union([ z.lazy(() => EnumUserRoleFilterSchema), z.lazy(() => UserRoleSchema) ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
+  sponsor_code: z.union([ z.lazy(() => StringNullableFilterSchema), z.string() ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionListRelationFilterSchema).optional(),
   daily_logs: z.lazy(() => DailyLogListRelationFilterSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipListRelationFilterSchema).optional(),
@@ -650,6 +659,7 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   role: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
+  sponsor_code: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
   addictions: z.lazy(() => UserAddictionOrderByRelationAggregateInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogOrderByRelationAggregateInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipOrderByRelationAggregateInputSchema).optional(),
@@ -664,17 +674,34 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   z.object({
     id: z.uuid(),
     email: z.string(),
+    sponsor_code: z.string(),
+  }),
+  z.object({
+    id: z.uuid(),
+    email: z.string(),
+  }),
+  z.object({
+    id: z.uuid(),
+    sponsor_code: z.string(),
   }),
   z.object({
     id: z.uuid(),
   }),
   z.object({
     email: z.string(),
+    sponsor_code: z.string(),
+  }),
+  z.object({
+    email: z.string(),
+  }),
+  z.object({
+    sponsor_code: z.string(),
   }),
 ])
 .and(z.strictObject({
   id: z.uuid().optional(),
   email: z.string().optional(),
+  sponsor_code: z.string().optional(),
   AND: z.union([ z.lazy(() => UserWhereInputSchema), z.lazy(() => UserWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => UserWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => UserWhereInputSchema), z.lazy(() => UserWhereInputSchema).array() ]).optional(),
@@ -701,6 +728,7 @@ export const UserOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserOrderBy
   role: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
+  sponsor_code: z.union([ z.lazy(() => SortOrderSchema), z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => UserCountOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => UserMaxOrderByAggregateInputSchema).optional(),
   _min: z.lazy(() => UserMinOrderByAggregateInputSchema).optional(),
@@ -717,6 +745,7 @@ export const UserScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserScal
   role: z.union([ z.lazy(() => EnumUserRoleWithAggregatesFilterSchema), z.lazy(() => UserRoleSchema) ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   updated_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
+  sponsor_code: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema), z.string() ]).optional().nullable(),
 });
 
 export const CravingLevelWhereInputSchema: z.ZodType<Prisma.CravingLevelWhereInput> = z.strictObject({
@@ -949,7 +978,7 @@ export const SponsorshipWhereInputSchema: z.ZodType<Prisma.SponsorshipWhereInput
   addict_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   ended_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
+  status: z.union([ z.lazy(() => EnumSponsorshipStatusFilterSchema), z.lazy(() => SponsorshipStatusSchema) ]).optional(),
   termination_reason: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   sponsor: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
@@ -962,7 +991,7 @@ export const SponsorshipOrderByWithRelationInputSchema: z.ZodType<Prisma.Sponsor
   addict_id: z.lazy(() => SortOrderSchema).optional(),
   started_at: z.lazy(() => SortOrderSchema).optional(),
   ended_at: z.lazy(() => SortOrderSchema).optional(),
-  is_active: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
   termination_reason: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   sponsor: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
@@ -1006,7 +1035,7 @@ export const SponsorshipWhereUniqueInputSchema: z.ZodType<Prisma.SponsorshipWher
   NOT: z.union([ z.lazy(() => SponsorshipWhereInputSchema), z.lazy(() => SponsorshipWhereInputSchema).array() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   ended_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
+  status: z.union([ z.lazy(() => EnumSponsorshipStatusFilterSchema), z.lazy(() => SponsorshipStatusSchema) ]).optional(),
   termination_reason: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   sponsor: z.union([ z.lazy(() => UserScalarRelationFilterSchema), z.lazy(() => UserWhereInputSchema) ]).optional(),
@@ -1019,7 +1048,7 @@ export const SponsorshipOrderByWithAggregationInputSchema: z.ZodType<Prisma.Spon
   addict_id: z.lazy(() => SortOrderSchema).optional(),
   started_at: z.lazy(() => SortOrderSchema).optional(),
   ended_at: z.lazy(() => SortOrderSchema).optional(),
-  is_active: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
   termination_reason: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => SponsorshipCountOrderByAggregateInputSchema).optional(),
@@ -1036,7 +1065,7 @@ export const SponsorshipScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.S
   addict_id: z.union([ z.lazy(() => UuidWithAggregatesFilterSchema), z.string() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
   ended_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
-  is_active: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema), z.boolean() ]).optional(),
+  status: z.union([ z.lazy(() => EnumSponsorshipStatusWithAggregatesFilterSchema), z.lazy(() => SponsorshipStatusSchema) ]).optional(),
   termination_reason: z.union([ z.lazy(() => StringWithAggregatesFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema), z.coerce.date() ]).optional(),
 });
@@ -1571,6 +1600,7 @@ export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.strict
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -1589,6 +1619,7 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreat
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -1607,6 +1638,7 @@ export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.strict
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -1625,6 +1657,7 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -1643,6 +1676,7 @@ export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> = 
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
 });
 
 export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyMutationInput> = z.strictObject({
@@ -1653,6 +1687,7 @@ export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyM
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 });
 
 export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedUpdateManyInput> = z.strictObject({
@@ -1663,6 +1698,7 @@ export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedU
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 });
 
 export const CravingLevelCreateInputSchema: z.ZodType<Prisma.CravingLevelCreateInput> = z.strictObject({
@@ -1866,7 +1902,7 @@ export const SponsorshipCreateInputSchema: z.ZodType<Prisma.SponsorshipCreateInp
   id: z.uuid().optional(),
   started_at: z.coerce.date().optional(),
   ended_at: z.coerce.date().optional(),
-  is_active: z.boolean().optional(),
+  status: z.lazy(() => SponsorshipStatusSchema).optional(),
   termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
   sponsor: z.lazy(() => UserCreateNestedOneWithoutSponsorships_as_sponsorInputSchema).optional(),
@@ -1879,7 +1915,7 @@ export const SponsorshipUncheckedCreateInputSchema: z.ZodType<Prisma.Sponsorship
   addict_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
   ended_at: z.coerce.date().optional(),
-  is_active: z.boolean().optional(),
+  status: z.lazy(() => SponsorshipStatusSchema).optional(),
   termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
@@ -1888,7 +1924,7 @@ export const SponsorshipUpdateInputSchema: z.ZodType<Prisma.SponsorshipUpdateInp
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   sponsor: z.lazy(() => UserUpdateOneRequiredWithoutSponsorships_as_sponsorNestedInputSchema).optional(),
@@ -1901,7 +1937,7 @@ export const SponsorshipUncheckedUpdateInputSchema: z.ZodType<Prisma.Sponsorship
   addict_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -1912,7 +1948,7 @@ export const SponsorshipCreateManyInputSchema: z.ZodType<Prisma.SponsorshipCreat
   addict_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
   ended_at: z.coerce.date().optional(),
-  is_active: z.boolean().optional(),
+  status: z.lazy(() => SponsorshipStatusSchema).optional(),
   termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
@@ -1921,7 +1957,7 @@ export const SponsorshipUpdateManyMutationInputSchema: z.ZodType<Prisma.Sponsors
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -1932,7 +1968,7 @@ export const SponsorshipUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Sponsor
   addict_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -2469,6 +2505,21 @@ export const DateTimeFilterSchema: z.ZodType<Prisma.DateTimeFilter> = z.strictOb
   not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeFilterSchema) ]).optional(),
 });
 
+export const StringNullableFilterSchema: z.ZodType<Prisma.StringNullableFilter> = z.strictObject({
+  equals: z.string().optional().nullable(),
+  in: z.string().array().optional().nullable(),
+  notIn: z.string().array().optional().nullable(),
+  lt: z.string().optional(),
+  lte: z.string().optional(),
+  gt: z.string().optional(),
+  gte: z.string().optional(),
+  contains: z.string().optional(),
+  startsWith: z.string().optional(),
+  endsWith: z.string().optional(),
+  mode: z.lazy(() => QueryModeSchema).optional(),
+  not: z.union([ z.string(),z.lazy(() => NestedStringNullableFilterSchema) ]).optional().nullable(),
+});
+
 export const UserAddictionListRelationFilterSchema: z.ZodType<Prisma.UserAddictionListRelationFilter> = z.strictObject({
   every: z.lazy(() => UserAddictionWhereInputSchema).optional(),
   some: z.lazy(() => UserAddictionWhereInputSchema).optional(),
@@ -2511,6 +2562,11 @@ export const LogAbsenceListRelationFilterSchema: z.ZodType<Prisma.LogAbsenceList
   none: z.lazy(() => LogAbsenceWhereInputSchema).optional(),
 });
 
+export const SortOrderInputSchema: z.ZodType<Prisma.SortOrderInput> = z.strictObject({
+  sort: z.lazy(() => SortOrderSchema),
+  nulls: z.lazy(() => NullsOrderSchema).optional(),
+});
+
 export const UserAddictionOrderByRelationAggregateInputSchema: z.ZodType<Prisma.UserAddictionOrderByRelationAggregateInput> = z.strictObject({
   _count: z.lazy(() => SortOrderSchema).optional(),
 });
@@ -2547,6 +2603,7 @@ export const UserCountOrderByAggregateInputSchema: z.ZodType<Prisma.UserCountOrd
   role: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
+  sponsor_code: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const UserMaxOrderByAggregateInputSchema: z.ZodType<Prisma.UserMaxOrderByAggregateInput> = z.strictObject({
@@ -2557,6 +2614,7 @@ export const UserMaxOrderByAggregateInputSchema: z.ZodType<Prisma.UserMaxOrderBy
   role: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
+  sponsor_code: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const UserMinOrderByAggregateInputSchema: z.ZodType<Prisma.UserMinOrderByAggregateInput> = z.strictObject({
@@ -2567,6 +2625,7 @@ export const UserMinOrderByAggregateInputSchema: z.ZodType<Prisma.UserMinOrderBy
   role: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
   updated_at: z.lazy(() => SortOrderSchema).optional(),
+  sponsor_code: z.lazy(() => SortOrderSchema).optional(),
 });
 
 export const UuidWithAggregatesFilterSchema: z.ZodType<Prisma.UuidWithAggregatesFilter> = z.strictObject({
@@ -2624,6 +2683,24 @@ export const DateTimeWithAggregatesFilterSchema: z.ZodType<Prisma.DateTimeWithAg
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
   _min: z.lazy(() => NestedDateTimeFilterSchema).optional(),
   _max: z.lazy(() => NestedDateTimeFilterSchema).optional(),
+});
+
+export const StringNullableWithAggregatesFilterSchema: z.ZodType<Prisma.StringNullableWithAggregatesFilter> = z.strictObject({
+  equals: z.string().optional().nullable(),
+  in: z.string().array().optional().nullable(),
+  notIn: z.string().array().optional().nullable(),
+  lt: z.string().optional(),
+  lte: z.string().optional(),
+  gt: z.string().optional(),
+  gte: z.string().optional(),
+  contains: z.string().optional(),
+  startsWith: z.string().optional(),
+  endsWith: z.string().optional(),
+  mode: z.lazy(() => QueryModeSchema).optional(),
+  not: z.union([ z.string(),z.lazy(() => NestedStringNullableWithAggregatesFilterSchema) ]).optional().nullable(),
+  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _min: z.lazy(() => NestedStringNullableFilterSchema).optional(),
+  _max: z.lazy(() => NestedStringNullableFilterSchema).optional(),
 });
 
 export const IntFilterSchema: z.ZodType<Prisma.IntFilter> = z.strictObject({
@@ -2765,13 +2842,20 @@ export const BoolWithAggregatesFilterSchema: z.ZodType<Prisma.BoolWithAggregates
   _max: z.lazy(() => NestedBoolFilterSchema).optional(),
 });
 
+export const EnumSponsorshipStatusFilterSchema: z.ZodType<Prisma.EnumSponsorshipStatusFilter> = z.strictObject({
+  equals: z.lazy(() => SponsorshipStatusSchema).optional(),
+  in: z.lazy(() => SponsorshipStatusSchema).array().optional(),
+  notIn: z.lazy(() => SponsorshipStatusSchema).array().optional(),
+  not: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => NestedEnumSponsorshipStatusFilterSchema) ]).optional(),
+});
+
 export const SponsorshipCountOrderByAggregateInputSchema: z.ZodType<Prisma.SponsorshipCountOrderByAggregateInput> = z.strictObject({
   id: z.lazy(() => SortOrderSchema).optional(),
   sponsor_id: z.lazy(() => SortOrderSchema).optional(),
   addict_id: z.lazy(() => SortOrderSchema).optional(),
   started_at: z.lazy(() => SortOrderSchema).optional(),
   ended_at: z.lazy(() => SortOrderSchema).optional(),
-  is_active: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
   termination_reason: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
 });
@@ -2782,7 +2866,7 @@ export const SponsorshipMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Sponsor
   addict_id: z.lazy(() => SortOrderSchema).optional(),
   started_at: z.lazy(() => SortOrderSchema).optional(),
   ended_at: z.lazy(() => SortOrderSchema).optional(),
-  is_active: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
   termination_reason: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
 });
@@ -2793,9 +2877,19 @@ export const SponsorshipMinOrderByAggregateInputSchema: z.ZodType<Prisma.Sponsor
   addict_id: z.lazy(() => SortOrderSchema).optional(),
   started_at: z.lazy(() => SortOrderSchema).optional(),
   ended_at: z.lazy(() => SortOrderSchema).optional(),
-  is_active: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
   termination_reason: z.lazy(() => SortOrderSchema).optional(),
   created_at: z.lazy(() => SortOrderSchema).optional(),
+});
+
+export const EnumSponsorshipStatusWithAggregatesFilterSchema: z.ZodType<Prisma.EnumSponsorshipStatusWithAggregatesFilter> = z.strictObject({
+  equals: z.lazy(() => SponsorshipStatusSchema).optional(),
+  in: z.lazy(() => SponsorshipStatusSchema).array().optional(),
+  notIn: z.lazy(() => SponsorshipStatusSchema).array().optional(),
+  not: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => NestedEnumSponsorshipStatusWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumSponsorshipStatusFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumSponsorshipStatusFilterSchema).optional(),
 });
 
 export const CravingLevelScalarRelationFilterSchema: z.ZodType<Prisma.CravingLevelScalarRelationFilter> = z.strictObject({
@@ -3235,6 +3329,10 @@ export const DateTimeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.DateTime
   set: z.coerce.date().optional(),
 });
 
+export const NullableStringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableStringFieldUpdateOperationsInput> = z.strictObject({
+  set: z.string().optional().nullable(),
+});
+
 export const UserAddictionUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prisma.UserAddictionUpdateManyWithoutUserNestedInput> = z.strictObject({
   create: z.union([ z.lazy(() => UserAddictionCreateWithoutUserInputSchema), z.lazy(() => UserAddictionCreateWithoutUserInputSchema).array(), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema), z.lazy(() => UserAddictionUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema), z.lazy(() => UserAddictionCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
@@ -3665,6 +3763,10 @@ export const UserCreateNestedOneWithoutSponsorships_as_addictInputSchema: z.ZodT
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
 });
 
+export const EnumSponsorshipStatusFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumSponsorshipStatusFieldUpdateOperationsInput> = z.strictObject({
+  set: z.lazy(() => SponsorshipStatusSchema).optional(),
+});
+
 export const UserUpdateOneRequiredWithoutSponsorships_as_sponsorNestedInputSchema: z.ZodType<Prisma.UserUpdateOneRequiredWithoutSponsorships_as_sponsorNestedInput> = z.strictObject({
   create: z.union([ z.lazy(() => UserCreateWithoutSponsorships_as_sponsorInputSchema), z.lazy(() => UserUncheckedCreateWithoutSponsorships_as_sponsorInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutSponsorships_as_sponsorInputSchema).optional(),
@@ -3970,6 +4072,20 @@ export const NestedDateTimeFilterSchema: z.ZodType<Prisma.NestedDateTimeFilter> 
   not: z.union([ z.coerce.date(),z.lazy(() => NestedDateTimeFilterSchema) ]).optional(),
 });
 
+export const NestedStringNullableFilterSchema: z.ZodType<Prisma.NestedStringNullableFilter> = z.strictObject({
+  equals: z.string().optional().nullable(),
+  in: z.string().array().optional().nullable(),
+  notIn: z.string().array().optional().nullable(),
+  lt: z.string().optional(),
+  lte: z.string().optional(),
+  gt: z.string().optional(),
+  gte: z.string().optional(),
+  contains: z.string().optional(),
+  startsWith: z.string().optional(),
+  endsWith: z.string().optional(),
+  not: z.union([ z.string(),z.lazy(() => NestedStringNullableFilterSchema) ]).optional().nullable(),
+});
+
 export const NestedUuidWithAggregatesFilterSchema: z.ZodType<Prisma.NestedUuidWithAggregatesFilter> = z.strictObject({
   equals: z.string().optional(),
   in: z.string().array().optional(),
@@ -4036,6 +4152,34 @@ export const NestedDateTimeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedDa
   _max: z.lazy(() => NestedDateTimeFilterSchema).optional(),
 });
 
+export const NestedStringNullableWithAggregatesFilterSchema: z.ZodType<Prisma.NestedStringNullableWithAggregatesFilter> = z.strictObject({
+  equals: z.string().optional().nullable(),
+  in: z.string().array().optional().nullable(),
+  notIn: z.string().array().optional().nullable(),
+  lt: z.string().optional(),
+  lte: z.string().optional(),
+  gt: z.string().optional(),
+  gte: z.string().optional(),
+  contains: z.string().optional(),
+  startsWith: z.string().optional(),
+  endsWith: z.string().optional(),
+  not: z.union([ z.string(),z.lazy(() => NestedStringNullableWithAggregatesFilterSchema) ]).optional().nullable(),
+  _count: z.lazy(() => NestedIntNullableFilterSchema).optional(),
+  _min: z.lazy(() => NestedStringNullableFilterSchema).optional(),
+  _max: z.lazy(() => NestedStringNullableFilterSchema).optional(),
+});
+
+export const NestedIntNullableFilterSchema: z.ZodType<Prisma.NestedIntNullableFilter> = z.strictObject({
+  equals: z.number().optional().nullable(),
+  in: z.number().array().optional().nullable(),
+  notIn: z.number().array().optional().nullable(),
+  lt: z.number().optional(),
+  lte: z.number().optional(),
+  gt: z.number().optional(),
+  gte: z.number().optional(),
+  not: z.union([ z.number(),z.lazy(() => NestedIntNullableFilterSchema) ]).optional().nullable(),
+});
+
 export const NestedIntWithAggregatesFilterSchema: z.ZodType<Prisma.NestedIntWithAggregatesFilter> = z.strictObject({
   equals: z.number().optional(),
   in: z.number().array().optional(),
@@ -4074,6 +4218,23 @@ export const NestedBoolWithAggregatesFilterSchema: z.ZodType<Prisma.NestedBoolWi
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
   _min: z.lazy(() => NestedBoolFilterSchema).optional(),
   _max: z.lazy(() => NestedBoolFilterSchema).optional(),
+});
+
+export const NestedEnumSponsorshipStatusFilterSchema: z.ZodType<Prisma.NestedEnumSponsorshipStatusFilter> = z.strictObject({
+  equals: z.lazy(() => SponsorshipStatusSchema).optional(),
+  in: z.lazy(() => SponsorshipStatusSchema).array().optional(),
+  notIn: z.lazy(() => SponsorshipStatusSchema).array().optional(),
+  not: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => NestedEnumSponsorshipStatusFilterSchema) ]).optional(),
+});
+
+export const NestedEnumSponsorshipStatusWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumSponsorshipStatusWithAggregatesFilter> = z.strictObject({
+  equals: z.lazy(() => SponsorshipStatusSchema).optional(),
+  in: z.lazy(() => SponsorshipStatusSchema).array().optional(),
+  notIn: z.lazy(() => SponsorshipStatusSchema).array().optional(),
+  not: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => NestedEnumSponsorshipStatusWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumSponsorshipStatusFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumSponsorshipStatusFilterSchema).optional(),
 });
 
 export const NestedDecimalFilterSchema: z.ZodType<Prisma.NestedDecimalFilter> = z.strictObject({
@@ -4171,7 +4332,7 @@ export const SponsorshipCreateWithoutSponsorInputSchema: z.ZodType<Prisma.Sponso
   id: z.uuid().optional(),
   started_at: z.coerce.date().optional(),
   ended_at: z.coerce.date().optional(),
-  is_active: z.boolean().optional(),
+  status: z.lazy(() => SponsorshipStatusSchema).optional(),
   termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
   addict: z.lazy(() => UserCreateNestedOneWithoutSponsorships_as_addictInputSchema).optional(),
@@ -4182,7 +4343,7 @@ export const SponsorshipUncheckedCreateWithoutSponsorInputSchema: z.ZodType<Pris
   addict_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
   ended_at: z.coerce.date().optional(),
-  is_active: z.boolean().optional(),
+  status: z.lazy(() => SponsorshipStatusSchema).optional(),
   termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
@@ -4201,7 +4362,7 @@ export const SponsorshipCreateWithoutAddictInputSchema: z.ZodType<Prisma.Sponsor
   id: z.uuid().optional(),
   started_at: z.coerce.date().optional(),
   ended_at: z.coerce.date().optional(),
-  is_active: z.boolean().optional(),
+  status: z.lazy(() => SponsorshipStatusSchema).optional(),
   termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
   sponsor: z.lazy(() => UserCreateNestedOneWithoutSponsorships_as_sponsorInputSchema).optional(),
@@ -4212,7 +4373,7 @@ export const SponsorshipUncheckedCreateWithoutAddictInputSchema: z.ZodType<Prism
   sponsor_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
   ended_at: z.coerce.date().optional(),
-  is_active: z.boolean().optional(),
+  status: z.lazy(() => SponsorshipStatusSchema).optional(),
   termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
@@ -4438,7 +4599,7 @@ export const SponsorshipScalarWhereInputSchema: z.ZodType<Prisma.SponsorshipScal
   addict_id: z.union([ z.lazy(() => UuidFilterSchema), z.string() ]).optional(),
   started_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
   ended_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
-  is_active: z.union([ z.lazy(() => BoolFilterSchema), z.boolean() ]).optional(),
+  status: z.union([ z.lazy(() => EnumSponsorshipStatusFilterSchema), z.lazy(() => SponsorshipStatusSchema) ]).optional(),
   termination_reason: z.union([ z.lazy(() => StringFilterSchema), z.string() ]).optional(),
   created_at: z.union([ z.lazy(() => DateTimeFilterSchema), z.coerce.date() ]).optional(),
 });
@@ -4685,6 +4846,7 @@ export const UserCreateWithoutAddictionsInputSchema: z.ZodType<Prisma.UserCreate
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
@@ -4702,6 +4864,7 @@ export const UserUncheckedCreateWithoutAddictionsInputSchema: z.ZodType<Prisma.U
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
@@ -4795,6 +4958,7 @@ export const UserUpdateWithoutAddictionsInputSchema: z.ZodType<Prisma.UserUpdate
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
@@ -4812,6 +4976,7 @@ export const UserUncheckedUpdateWithoutAddictionsInputSchema: z.ZodType<Prisma.U
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
@@ -4861,6 +5026,7 @@ export const UserCreateWithoutSponsorships_as_sponsorInputSchema: z.ZodType<Pris
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
@@ -4878,6 +5044,7 @@ export const UserUncheckedCreateWithoutSponsorships_as_sponsorInputSchema: z.Zod
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
@@ -4900,6 +5067,7 @@ export const UserCreateWithoutSponsorships_as_addictInputSchema: z.ZodType<Prism
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -4917,6 +5085,7 @@ export const UserUncheckedCreateWithoutSponsorships_as_addictInputSchema: z.ZodT
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -4950,6 +5119,7 @@ export const UserUpdateWithoutSponsorships_as_sponsorInputSchema: z.ZodType<Pris
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
@@ -4967,6 +5137,7 @@ export const UserUncheckedUpdateWithoutSponsorships_as_sponsorInputSchema: z.Zod
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
@@ -4995,6 +5166,7 @@ export const UserUpdateWithoutSponsorships_as_addictInputSchema: z.ZodType<Prism
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5012,6 +5184,7 @@ export const UserUncheckedUpdateWithoutSponsorships_as_addictInputSchema: z.ZodT
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5029,6 +5202,7 @@ export const UserCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.UserCreate
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipCreateNestedManyWithoutAddictInputSchema).optional(),
@@ -5046,6 +5220,7 @@ export const UserUncheckedCreateWithoutDaily_logsInputSchema: z.ZodType<Prisma.U
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutAddictInputSchema).optional(),
@@ -5121,6 +5296,7 @@ export const UserUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.UserUpdate
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUpdateManyWithoutAddictNestedInputSchema).optional(),
@@ -5138,6 +5314,7 @@ export const UserUncheckedUpdateWithoutDaily_logsInputSchema: z.ZodType<Prisma.U
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
   sponsorships_as_addict: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutAddictNestedInputSchema).optional(),
@@ -5315,6 +5492,7 @@ export const UserCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.UserCreateWi
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -5332,6 +5510,7 @@ export const UserUncheckedCreateWithoutAbsencesInputSchema: z.ZodType<Prisma.Use
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -5394,6 +5573,7 @@ export const UserUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.UserUpdateWi
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5411,6 +5591,7 @@ export const UserUncheckedUpdateWithoutAbsencesInputSchema: z.ZodType<Prisma.Use
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5463,6 +5644,7 @@ export const UserCreateWithoutContactsInputSchema: z.ZodType<Prisma.UserCreateWi
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -5480,6 +5662,7 @@ export const UserUncheckedCreateWithoutContactsInputSchema: z.ZodType<Prisma.Use
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -5513,6 +5696,7 @@ export const UserUpdateWithoutContactsInputSchema: z.ZodType<Prisma.UserUpdateWi
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5530,6 +5714,7 @@ export const UserUncheckedUpdateWithoutContactsInputSchema: z.ZodType<Prisma.Use
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5547,6 +5732,7 @@ export const UserCreateWithoutAlertsInputSchema: z.ZodType<Prisma.UserCreateWith
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -5564,6 +5750,7 @@ export const UserUncheckedCreateWithoutAlertsInputSchema: z.ZodType<Prisma.UserU
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -5624,6 +5811,7 @@ export const UserUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.UserUpdateWith
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5641,6 +5829,7 @@ export const UserUncheckedUpdateWithoutAlertsInputSchema: z.ZodType<Prisma.UserU
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5691,6 +5880,7 @@ export const UserCreateWithoutStreakInputSchema: z.ZodType<Prisma.UserCreateWith
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -5708,6 +5898,7 @@ export const UserUncheckedCreateWithoutStreakInputSchema: z.ZodType<Prisma.UserU
   role: z.lazy(() => UserRoleSchema).optional(),
   created_at: z.coerce.date().optional(),
   updated_at: z.coerce.date().optional(),
+  sponsor_code: z.string().optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedCreateNestedManyWithoutSponsorInputSchema).optional(),
@@ -5802,6 +5993,7 @@ export const UserUpdateWithoutStreakInputSchema: z.ZodType<Prisma.UserUpdateWith
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5819,6 +6011,7 @@ export const UserUncheckedUpdateWithoutStreakInputSchema: z.ZodType<Prisma.UserU
   role: z.union([ z.lazy(() => UserRoleSchema), z.lazy(() => EnumUserRoleFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   updated_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  sponsor_code: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   addictions: z.lazy(() => UserAddictionUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   daily_logs: z.lazy(() => DailyLogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   sponsorships_as_sponsor: z.lazy(() => SponsorshipUncheckedUpdateManyWithoutSponsorNestedInputSchema).optional(),
@@ -5917,7 +6110,7 @@ export const SponsorshipCreateManySponsorInputSchema: z.ZodType<Prisma.Sponsorsh
   addict_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
   ended_at: z.coerce.date().optional(),
-  is_active: z.boolean().optional(),
+  status: z.lazy(() => SponsorshipStatusSchema).optional(),
   termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
@@ -5927,7 +6120,7 @@ export const SponsorshipCreateManyAddictInputSchema: z.ZodType<Prisma.Sponsorshi
   sponsor_id: z.string().optional(),
   started_at: z.coerce.date().optional(),
   ended_at: z.coerce.date().optional(),
-  is_active: z.boolean().optional(),
+  status: z.lazy(() => SponsorshipStatusSchema).optional(),
   termination_reason: z.string().optional(),
   created_at: z.coerce.date().optional(),
 });
@@ -6042,7 +6235,7 @@ export const SponsorshipUpdateWithoutSponsorInputSchema: z.ZodType<Prisma.Sponso
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   addict: z.lazy(() => UserUpdateOneRequiredWithoutSponsorships_as_addictNestedInputSchema).optional(),
@@ -6053,7 +6246,7 @@ export const SponsorshipUncheckedUpdateWithoutSponsorInputSchema: z.ZodType<Pris
   addict_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -6063,7 +6256,7 @@ export const SponsorshipUncheckedUpdateManyWithoutSponsorInputSchema: z.ZodType<
   addict_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -6072,7 +6265,7 @@ export const SponsorshipUpdateWithoutAddictInputSchema: z.ZodType<Prisma.Sponsor
   id: z.union([ z.uuid(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   sponsor: z.lazy(() => UserUpdateOneRequiredWithoutSponsorships_as_sponsorNestedInputSchema).optional(),
@@ -6083,7 +6276,7 @@ export const SponsorshipUncheckedUpdateWithoutAddictInputSchema: z.ZodType<Prism
   sponsor_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
@@ -6093,7 +6286,7 @@ export const SponsorshipUncheckedUpdateManyWithoutAddictInputSchema: z.ZodType<P
   sponsor_id: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   started_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   ended_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  is_active: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => SponsorshipStatusSchema), z.lazy(() => EnumSponsorshipStatusFieldUpdateOperationsInputSchema) ]).optional(),
   termination_reason: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   created_at: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 });
