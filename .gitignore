@@ -14,6 +14,7 @@ prisma/*.db-journal
 # Generated (regenerable via db:generate)
 src/schemas/*.ts
 !src/schemas/.gitkeep
+postgres/simulate_queries.sql
 
 # OS
 .DS_Store
