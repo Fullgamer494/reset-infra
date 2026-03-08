@@ -21,6 +21,14 @@ enum UserRole {
   @@schema("auth")
 }
 
+enum SponsorshipStatus {
+  PENDING
+  ACTIVE
+  INACTIVE
+
+  @@schema("core")
+}
+
 // ==========================================
 // 1. SCHEMA: AUTH
 // ==========================================
@@ -32,6 +40,7 @@ model User {
   role          UserRole @default(ADICTO)
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
+  sponsor_code  String?  @unique @db.VarChar(10)
 
   addictions              UserAddiction[]
   daily_logs              DailyLog[]
@@ -91,14 +100,15 @@ model UserAddiction {
 }
 
 model Sponsorship {
-  id                 String   @id @default(uuid()) @db.Uuid
-  sponsor_id         String   @unique @default("00000000-0000-0000-0000-000000000000") @db.Uuid
-  addict_id          String   @unique @default("00000000-0000-0000-0000-000000000000") @db.Uuid
-  started_at         DateTime @default(now())
-  ended_at           DateTime @default("9999-12-31T23:59:59Z")
-  is_active          Boolean  @default(true)
-  termination_reason String   @default("") @db.Text
-  created_at         DateTime @default(now())
+  id                 String            @id @default(uuid()) @db.Uuid
+  sponsor_id         String            @unique @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  addict_id          String            @unique @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  started_at         DateTime          @default(now())
+  ended_at           DateTime          @default("9999-12-31T23:59:59Z")
+  status             SponsorshipStatus @default(PENDING)
+  termination_reason String            @default("") @db.Text
+
+  created_at DateTime @default(now())
 
   sponsor User @relation("SponsorRelation", fields: [sponsor_id], references: [id])
   addict  User @relation("AddictRelation", fields: [addict_id], references: [id])
