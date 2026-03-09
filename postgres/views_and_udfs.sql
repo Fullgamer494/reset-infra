@@ -32,7 +32,7 @@ BEGIN
     VALUES (v_streak.id, 'relapse', NOW(), v_streak.day_counter);
 
   -- 2b. Sin consumo -> verificar continuidad
-  ELSIF v_streak.last_log_date IS NULL OR v_streak.last_log_date = v_yesterday THEN
+  ELSIF v_streak.last_log_date IS NULL OR v_streak.last_log_date = '2026-02-08' OR v_streak.last_log_date = v_yesterday THEN
     UPDATE core.streaks
     SET day_counter = day_counter + 1,
         last_log_date = NEW.log_date,

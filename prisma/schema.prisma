@@ -162,7 +162,7 @@ model LogAbsence {
   id              String   @id @default(uuid()) @db.Uuid
   user_id         String   @db.Uuid
   streak_id       String   @db.Uuid
-  last_log_date   DateTime @default("1970-01-01T00:00:00Z") @db.Date
+  last_log_date   DateTime @default("2026-02-08T00:00:00Z") @db.Date
   detected_at     DateTime @default(now())
   absence_hours   Int      @default(0)
   event_generated Boolean  @default(false)
@@ -220,7 +220,7 @@ model Streak {
   status            String   @default("") @db.VarChar(20)
   started_at        DateTime
   day_counter       Int      @default(0)
-  last_log_date     DateTime @default("1970-01-01T00:00:00Z") @db.Date
+  last_log_date     DateTime @default("2026-02-08T00:00:00Z") @db.Date
   updated_at        DateTime @default(now()) @updatedAt
 
   user      User          @relation(fields: [user_id], references: [id], onDelete: Cascade)
