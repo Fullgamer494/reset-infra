@@ -40,8 +40,8 @@ db.createCollection("comments", {
             bsonType: "object",
             required: ["postId", "authorId", "content", "isAnonymous", "createdAt"],
             properties: {
-                postId: { bsonType: "objectId" },
-                parentId: { bsonType: ["objectId", "null"] },
+                postId: { bsonType: "string" },
+                parentId: { bsonType: ["string", "null"] },
                 authorId: { bsonType: "string" },
                 content: { bsonType: "string" },
                 isAnonymous: { bsonType: "bool" },
@@ -67,7 +67,7 @@ db.createCollection("reactions", {
             required: ["userId", "targetId", "targetType", "createdAt"],
             properties: {
                 userId: { bsonType: "string" },
-                targetId: { bsonType: "objectId" },
+                targetId: { bsonType: "string" },
                 targetType: { enum: ["post", "comment"] },
                 createdAt: { bsonType: "date" }
             }
@@ -87,7 +87,7 @@ db.createCollection("reports", {
             required: ["reporterId", "targetId", "targetType", "reason", "createdAt"],
             properties: {
                 reporterId: { bsonType: "string" },
-                targetId: { bsonType: "objectId" },
+                targetId: { bsonType: "string" },
                 targetType: { enum: ["post", "comment"] },
                 reason: {
                     enum: [
@@ -139,7 +139,7 @@ db.createCollection("notifications", {
                         "SPONSORSHIP_REJECTED"
                     ]
                 },
-                targetId: { bsonType: "objectId", description: "Referencia al post o comentario según el tipo" },
+                targetId: { bsonType: "string", description: "Referencia al post o comentario según el tipo" },
                 isRead: { bsonType: "bool" },
                 createdAt: { bsonType: "date" }
             }
@@ -149,6 +149,26 @@ db.createCollection("notifications", {
 
 // Índices para obtener rápidamente las notificaciones de un usuario
 db.notifications.createIndex({ "userId": 1, "createdAt": -1 });
-// Índice para filtrar notificaciones no leídas
+// Índices para filtrar notificaciones no leídas
 db.notifications.createIndex({ "userId": 1, "isRead": 1 });
+
+db.createCollection("encouragement_notes", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["senderId", "receiverId", "content", "createdAt"],
+            properties: {
+                senderId: { bsonType: "string", description: "UUID del sponsor emisor" },
+                receiverId: { bsonType: "string", description: "UUID del adicto receptor" },
+                content: { bsonType: "string", description: "Contenido del mensaje de aliento" },
+                createdAt: { bsonType: "date" }
+            }
+        }
+    }
+});
+
+// Índice para obtener rápidamente los mensajes recibidos por un adicto, ordenados por fecha
+db.encouragement_notes.createIndex({ "receiverId": 1, "createdAt": -1 });
+// Índice para buscar mensajes enviados por un sponsor
+db.encouragement_notes.createIndex({ "senderId": 1 });
 

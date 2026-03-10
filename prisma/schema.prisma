@@ -41,6 +41,7 @@ model User {
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
   sponsor_code  String?  @unique @db.VarChar(10)
+  avatar_url    String   @default("https://api.dicebear.com/7.x/pixel-art/svg?seed=default") @db.Text
 
   addictions              UserAddiction[]
   daily_logs              DailyLog[]
