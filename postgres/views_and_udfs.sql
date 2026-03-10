@@ -1,4 +1,4 @@
-﻿-- ==========================================
+-- ==========================================
 -- UDFS y Triggers
 -- ==========================================
 
@@ -9,7 +9,6 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
   v_streak core.streaks%ROWTYPE;
-  v_yesterday DATE := NEW.log_date - INTERVAL '1 day';
 BEGIN
   -- 1. Obtener racha activa del usuario
   SELECT * INTO v_streak
@@ -32,7 +31,10 @@ BEGIN
     VALUES (v_streak.id, 'relapse', NOW(), v_streak.day_counter);
 
   -- 2b. Sin consumo -> verificar continuidad
-  ELSIF v_streak.last_log_date IS NULL OR v_streak.last_log_date = '2026-02-08' OR v_streak.last_log_date < NEW.log_date THEN
+  ELSIF v_streak.last_log_date IS NULL 
+     OR v_streak.last_log_date = '2026-02-08'::DATE 
+     OR v_streak.last_log_date < NEW.log_date 
+  THEN
     UPDATE core.streaks
     SET day_counter = day_counter + 1,
         last_log_date = NEW.log_date,
@@ -109,7 +111,7 @@ BEGIN
   LIMIT 1;
 
   IF NOT FOUND THEN
-    RAISE EXCEPTION 'Usuario no tiene adicciónn activa registrada.', p_user_id;
+    RAISE EXCEPTION 'Usuario % no tiene adicción activa registrada.', p_user_id;
   END IF;
 
   INSERT INTO emergency.emergency_alerts (user_id, user_addiction_id, activated_at)
