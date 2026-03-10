@@ -35,8 +35,8 @@ BEGIN
 
       IF v_streak_id IS NULL THEN
         -- Crear racha desde cero
-        INSERT INTO core.streaks (user_id, user_addiction_id, status, started_at, day_counter, last_log_date, updated_at)
-        VALUES (NEW.user_id, v_addiction_id, 'active', NEW.log_date, 1, NEW.log_date, NOW())
+        INSERT INTO core.streaks (id, user_id, user_addiction_id, status, started_at, day_counter, last_log_date, updated_at)
+        VALUES (gen_random_uuid(), NEW.user_id, v_addiction_id, 'active', NEW.log_date, 1, NEW.log_date, NOW())
         RETURNING id INTO v_streak_id;
       ELSE
         -- Reiniciar racha existente que estaba rota
@@ -50,8 +50,8 @@ BEGIN
       END IF;
 
       -- Registrar evento de progreso inicial
-      INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
-      VALUES (v_streak_id, 'progress', NOW(), 1);
+      INSERT INTO tracking.streak_events (id, streak_id, event_type, event_date, days_achieved)
+      VALUES (gen_random_uuid(), v_streak_id, 'progress', NOW(), 1);
 
     -- B. Si ya tiene racha activa -> ACTUALIZACIÓN NORMAL
     ELSIF v_status = 'active' THEN
@@ -63,8 +63,8 @@ BEGIN
             updated_at = NOW()
         WHERE id = v_streak_id;
 
-        INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
-        VALUES (v_streak_id, 'progress', NOW(), v_day_counter + 1);
+        INSERT INTO tracking.streak_events (id, streak_id, event_type, event_date, days_achieved)
+        VALUES (gen_random_uuid(), v_streak_id, 'progress', NOW(), v_day_counter + 1);
       END IF;
     END IF;
 
@@ -76,8 +76,8 @@ BEGIN
       SET status = 'broken', updated_at = NOW()
       WHERE id = v_streak_id;
 
-      INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
-      VALUES (v_streak_id, 'relapse', NOW(), v_day_counter);
+      INSERT INTO tracking.streak_events (id, streak_id, event_type, event_date, days_achieved)
+      VALUES (gen_random_uuid(), v_streak_id, 'relapse', NOW(), v_day_counter);
     END IF;
   END IF;
 
