@@ -125,8 +125,8 @@ model DailyLog {
   user_id            String   @db.Uuid
   log_date           DateTime @db.Date
   consumed           Boolean  @default(false)
-  craving_level_id   String   @default("00000000-0000-0000-0000-000000000000") @db.Uuid
-  emotional_state_id String   @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  craving_level_id   String   @db.Uuid
+  emotional_state_id String   @db.Uuid
   triggers           String   @default("") @db.Text
   notes              String   @default("") @db.Text
   created_at         DateTime @default(now())
