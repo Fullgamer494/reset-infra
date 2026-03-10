@@ -8,41 +8,77 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-  v_streak core.streaks%ROWTYPE;
+  v_streak_id UUID;
+  v_addiction_id UUID;
+  v_day_counter INT;
+  v_last_log_date DATE;
+  v_status VARCHAR(20);
 BEGIN
-  -- 1. Obtener racha activa del usuario
-  SELECT * INTO v_streak
+  -- 1. Intentar obtener el registro de racha del usuario (activa o rota)
+  SELECT id, day_counter, last_log_date, status 
+  INTO v_streak_id, v_day_counter, v_last_log_date, v_status
   FROM core.streaks
   WHERE user_id = NEW.user_id
-  AND status = 'active'
   LIMIT 1;
 
-  IF NOT FOUND THEN
-    RETURN NEW; -- Sin racha activa, no hacer nada
-  END IF;
+  -- 2. ESCENARIO: LOG LIMPIO (consumed = FALSE)
+  IF NEW.consumed = FALSE THEN
+    -- A. Si NO tiene racha o la actual está rota -> CREACIÓN/REINICIO
+    IF v_streak_id IS NULL OR v_status = 'broken' THEN
+      -- Buscar adicción activa obligatoria
+      SELECT id INTO v_addiction_id
+      FROM core.user_addictions
+      WHERE user_id = NEW.user_id AND is_active = TRUE
+      LIMIT 1;
 
-  -- 2a. Consumo registrado -> romper racha
-  IF NEW.consumed = TRUE THEN
-    UPDATE core.streaks
-    SET status = 'broken', updated_at = NOW()
-    WHERE id = v_streak.id;
+      IF NOT FOUND THEN RETURN NEW; END IF;
 
-    INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
-    VALUES (v_streak.id, 'relapse', NOW(), v_streak.day_counter);
+      IF v_streak_id IS NULL THEN
+        -- Crear racha desde cero
+        INSERT INTO core.streaks (user_id, user_addiction_id, status, started_at, day_counter, last_log_date, updated_at)
+        VALUES (NEW.user_id, v_addiction_id, 'active', NEW.log_date, 1, NEW.log_date, NOW())
+        RETURNING id INTO v_streak_id;
+      ELSE
+        -- Reiniciar racha existente que estaba rota
+        UPDATE core.streaks
+        SET status = 'active', 
+            started_at = NEW.log_date, 
+            day_counter = 1, 
+            last_log_date = NEW.log_date,
+            updated_at = NOW()
+        WHERE id = v_streak_id;
+      END IF;
 
-  -- 2b. Sin consumo -> verificar continuidad
-  ELSIF v_streak.last_log_date IS NULL 
-     OR v_streak.last_log_date = '2026-02-08'::DATE 
-     OR v_streak.last_log_date < NEW.log_date 
-  THEN
-    UPDATE core.streaks
-    SET day_counter = day_counter + 1,
-        last_log_date = NEW.log_date,
-        updated_at = NOW()
-    WHERE id = v_streak.id;
+      -- Registrar evento de progreso inicial
+      INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
+      VALUES (v_streak_id, 'progress', NOW(), 1);
 
-    INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
-    VALUES (v_streak.id, 'progress', NOW(), v_streak.day_counter + 1);
+    -- B. Si ya tiene racha activa -> ACTUALIZACIÓN NORMAL
+    ELSIF v_status = 'active' THEN
+      -- Solo actualizar si el log es de una fecha nueva
+      IF v_last_log_date IS NULL OR v_last_log_date < NEW.log_date THEN
+        UPDATE core.streaks
+        SET day_counter = day_counter + 1,
+            last_log_date = NEW.log_date,
+            updated_at = NOW()
+        WHERE id = v_streak_id;
+
+        INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
+        VALUES (v_streak_id, 'progress', NOW(), v_day_counter + 1);
+      END IF;
+    END IF;
+
+  -- 3. ESCENARIO: RECAÍDA (consumed = TRUE)
+  ELSE
+    -- Solo si tenía una racha activa, la rompemos
+    IF v_streak_id IS NOT NULL AND v_status = 'active' THEN
+      UPDATE core.streaks
+      SET status = 'broken', updated_at = NOW()
+      WHERE id = v_streak_id;
+
+      INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
+      VALUES (v_streak_id, 'relapse', NOW(), v_day_counter);
+    END IF;
   END IF;
 
   RETURN NEW;
