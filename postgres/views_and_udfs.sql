@@ -256,7 +256,7 @@ WITH ranked_logs AS (
 )
 SELECT * FROM ranked_logs WHERE rn = 1;
 
--- WF-02 AgregaciÃƒÂ³n con marco de ventana: Promedio mÃƒÂ³vil craving 7 dÃƒÂ­as
+-- WF-02 Agregaciónn con marco de ventana: Promedio móvil craving 7 días
 CREATE OR REPLACE VIEW tracking.v_user_craving_moving_avg AS
 SELECT
   dl.user_id,
