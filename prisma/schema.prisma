@@ -33,7 +33,7 @@ enum SponsorshipStatus {
 // 1. SCHEMA: AUTH
 // ==========================================
 model User {
-  id            String   @id @default(uuid()) @db.Uuid
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String   @db.VarChar(100)
   email         String   @unique @db.VarChar(150)
   password_hash String   @db.Text
@@ -60,7 +60,7 @@ model User {
 // 2. SCHEMA: CORE
 // ==========================================
 model CravingLevel {
-  id             String     @id @default(uuid()) @db.Uuid
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   level          Int        @unique // El valor 1-10
   label          String     @default("") @db.VarChar(50)
   description    String     @default("") @db.Text
@@ -72,7 +72,7 @@ model CravingLevel {
 }
 
 model EmotionalState {
-  id          String     @id @default(uuid()) @db.Uuid
+  id          String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   level       Int        @unique // El valor 1-10
   label       String     @default("") @db.VarChar(50)
   description String     @default("") @db.Text
@@ -84,7 +84,7 @@ model EmotionalState {
 }
 
 model UserAddiction {
-  id             String   @id @default(uuid()) @db.Uuid
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id        String   @unique @db.Uuid
   custom_name    String   @db.VarChar(100)
   classification String   @default("") @db.VarChar(50)
@@ -101,7 +101,7 @@ model UserAddiction {
 }
 
 model Sponsorship {
-  id                 String            @id @default(uuid()) @db.Uuid
+  id                 String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   sponsor_id         String            @default("00000000-0000-0000-0000-000000000000") @db.Uuid
   addict_id          String            @default("00000000-0000-0000-0000-000000000000") @db.Uuid
   started_at         DateTime          @default(now())
@@ -122,7 +122,7 @@ model Sponsorship {
 // 3. SCHEMA: TRACKING
 // ==========================================
 model DailyLog {
-  id                 String   @id @default(uuid()) @db.Uuid
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id            String   @db.Uuid
   log_date           DateTime @db.Date
   consumed           Boolean  @default(false)
@@ -142,7 +142,7 @@ model DailyLog {
 }
 
 model StreakEvent {
-  id                 String   @id @default(uuid()) @db.Uuid
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   streak_id          String   @db.Uuid
   emergency_alert_id String   @default("00000000-0000-0000-0000-000000000000") @db.Uuid
   event_type         String   @default("") @db.VarChar(20)
@@ -160,7 +160,7 @@ model StreakEvent {
 }
 
 model LogAbsence {
-  id              String   @id @default(uuid()) @db.Uuid
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id         String   @db.Uuid
   streak_id       String   @db.Uuid
   last_log_date   DateTime @default("2026-02-08T00:00:00Z") @db.Date
@@ -180,7 +180,7 @@ model LogAbsence {
 // 4. SCHEMA: EMERGENCY
 // ==========================================
 model SupportContact {
-  id                  String   @id @default(uuid()) @db.Uuid
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id             String   @db.Uuid
   contact_name        String   @db.VarChar(100)
   phone               String   @default("") @db.VarChar(20)
@@ -199,7 +199,7 @@ model SupportContact {
 }
 
 model EmergencyAlert {
-  id                  String   @id @default(uuid()) @db.Uuid
+  id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id             String   @db.Uuid
   user_addiction_id   String   @db.Uuid
   activated_at        DateTime @default(now())
@@ -215,7 +215,7 @@ model EmergencyAlert {
 }
 
 model Streak {
-  id                String   @id @default(uuid()) @db.Uuid
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id           String   @unique @db.Uuid
   user_addiction_id String   @unique @db.Uuid
   status            String   @default("") @db.VarChar(20)
