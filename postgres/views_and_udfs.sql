@@ -229,6 +229,9 @@ ON core.streaks (user_id, status);
 CREATE INDEX IF NOT EXISTS idx_log_absences_streak_date
 ON tracking.log_absences (streak_id, (detected_at::date));
 
+CREATE UNIQUE INDEX IF NOT EXISTS single_active_sponsorship_per_addict
+ON core.sponsorships (addict_id) WHERE status = 'ACTIVE';
+
 -- ==========================================
 -- WINDOW FUNCTIONS (VIEWS)
 -- ==========================================

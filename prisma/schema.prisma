@@ -102,8 +102,8 @@ model UserAddiction {
 
 model Sponsorship {
   id                 String            @id @default(uuid()) @db.Uuid
-  sponsor_id         String            @unique @default("00000000-0000-0000-0000-000000000000") @db.Uuid
-  addict_id          String            @unique @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  sponsor_id         String            @default("00000000-0000-0000-0000-000000000000") @db.Uuid
+  addict_id          String            @default("00000000-0000-0000-0000-000000000000") @db.Uuid
   started_at         DateTime          @default(now())
   ended_at           DateTime          @default("9999-12-31T23:59:59Z")
   status             SponsorshipStatus @default(PENDING)
