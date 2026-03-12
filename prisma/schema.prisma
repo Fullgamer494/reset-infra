@@ -42,6 +42,8 @@ model User {
   updated_at    DateTime @default(now()) @updatedAt
   sponsor_code  String?  @unique @db.VarChar(10)
   avatar_url    String   @default("https://api.dicebear.com/7.x/pixel-art/svg?seed=default") @db.Text
+  is_verified   Boolean  @default(false)
+  two_factor_enabled Boolean @default(false)
 
   addictions              UserAddiction[]
   daily_logs              DailyLog[]
@@ -54,6 +56,8 @@ model User {
   is_deleted              Boolean          @default(false)
   deleted_at              DateTime?
   password_reset_tokens   PasswordResetToken[]
+  trusted_devices         TrustedDevice[]
+  verification_tokens     VerificationToken[]
 
   @@map("users")
   @@schema("auth")
@@ -69,6 +73,34 @@ model PasswordResetToken {
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@map("password_reset_tokens")
+  @@schema("auth")
+}
+
+model TrustedDevice {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user_id           String   @db.Uuid
+  device_identifier String   @unique
+  device_name       String?  @db.VarChar(100)
+  last_used_at      DateTime @default(now())
+  expires_at        DateTime
+  created_at        DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("trusted_devices")
+  @@schema("auth")
+}
+
+model VerificationToken {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token      String   @unique
+  user_id    String   @db.Uuid
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("verification_tokens")
   @@schema("auth")
 }
 
