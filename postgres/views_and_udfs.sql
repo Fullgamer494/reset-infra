@@ -14,7 +14,7 @@ DECLARE
   v_last_log_date DATE;
   v_status VARCHAR(20);
 BEGIN
-  -- 1. Intentar obtener el registro de racha del usuario (activa o rota)
+  -- 1. Intentar obtener el registro de racha del usuario
   SELECT id, day_counter, last_log_date, status 
   INTO v_streak_id, v_day_counter, v_last_log_date, v_status
   FROM core.streaks
@@ -23,8 +23,9 @@ BEGIN
 
   -- 2. ESCENARIO: LOG LIMPIO (consumed = FALSE)
   IF NEW.consumed = FALSE THEN
-    -- A. Si NO tiene racha o la actual está rota -> CREACIÓN/REINICIO
-    IF v_streak_id IS NULL OR v_status = 'broken' THEN
+    -- A. Si NO tiene racha o está en un estado que permite reinicio/resunción
+    -- (incluimos 'paused' para que se reactive al volver a loggear)
+    IF v_streak_id IS NULL OR v_status IN ('broken', 'paused') THEN
       -- Buscar adicción activa obligatoria
       SELECT id INTO v_addiction_id
       FROM core.user_addictions
@@ -39,23 +40,25 @@ BEGIN
         VALUES (gen_random_uuid(), NEW.user_id, v_addiction_id, 'active', NEW.log_date, 1, NEW.log_date, NOW())
         RETURNING id INTO v_streak_id;
       ELSE
-        -- Reiniciar racha existente que estaba rota
+        -- Reiniciar o Reactivar racha existente
         UPDATE core.streaks
         SET status = 'active', 
-            started_at = NEW.log_date, 
-            day_counter = 1, 
+            -- Si estaba rota, empezamos racha nueva, si estaba pausada, continuamos o reiniciamos según lógica
+            -- Por simplicidad en este sistema: retomar con día 1 si estaba rota, o +1 si estaba pausada
+            day_counter = CASE WHEN v_status = 'broken' THEN 1 ELSE v_day_counter + 1 END,
             last_log_date = NEW.log_date,
             updated_at = NOW()
         WHERE id = v_streak_id;
       END IF;
 
-      -- Registrar evento de progreso inicial
+      -- Registrar evento de progreso en la "bitácora"
       INSERT INTO tracking.streak_events (id, streak_id, event_type, event_date, days_achieved)
-      VALUES (gen_random_uuid(), v_streak_id, 'progress', NOW(), 1);
+      VALUES (gen_random_uuid(), v_streak_id, 'progress', NOW(), 
+             CASE WHEN v_status = 'broken' OR v_status IS NULL THEN 1 ELSE v_day_counter + 1 END);
 
     -- B. Si ya tiene racha activa -> ACTUALIZACIÓN NORMAL
     ELSIF v_status = 'active' THEN
-      -- Solo actualizar si el log es de una fecha nueva
+      -- Solo actualizar si el log es de una fecha nueva (evitar duplicados en el mismo día)
       IF v_last_log_date IS NULL OR v_last_log_date < NEW.log_date THEN
         UPDATE core.streaks
         SET day_counter = day_counter + 1,
@@ -70,8 +73,8 @@ BEGIN
 
   -- 3. ESCENARIO: RECAÍDA (consumed = TRUE)
   ELSE
-    -- Solo si tenía una racha activa, la rompemos
-    IF v_streak_id IS NOT NULL AND v_status = 'active' THEN
+    -- Rompemos racha si estaba activa o pausada
+    IF v_streak_id IS NOT NULL AND v_status IN ('active', 'paused') THEN
       UPDATE core.streaks
       SET status = 'broken', updated_at = NOW()
       WHERE id = v_streak_id;

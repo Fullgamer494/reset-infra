@@ -8,39 +8,78 @@ RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 DECLARE
-  v_streak core.streaks%ROWTYPE;
-  v_yesterday DATE := NEW.log_date - INTERVAL '1 day';
+  v_streak_id UUID;
+  v_addiction_id UUID;
+  v_day_counter INT;
+  v_last_log_date DATE;
+  v_status VARCHAR(20);
 BEGIN
-  -- 1. Obtener racha activa del usuario
-  SELECT * INTO v_streak
+  -- 1. Intentar obtener el registro de racha del usuario
+  SELECT id, day_counter, last_log_date, status 
+  INTO v_streak_id, v_day_counter, v_last_log_date, v_status
   FROM core.streaks
   WHERE user_id = NEW.user_id
-  AND status = 'active'
   LIMIT 1;
 
-  IF NOT FOUND THEN
-    RETURN NEW; -- Sin racha activa, no hacer nada
-  END IF;
+  -- 2. ESCENARIO: LOG LIMPIO (consumed = FALSE)
+  IF NEW.consumed = FALSE THEN
+    -- A. Si NO tiene racha o está en un estado que permite reinicio/resunción
+    -- (incluimos 'paused' para que se reactive al volver a loggear)
+    IF v_streak_id IS NULL OR v_status IN ('broken', 'paused') THEN
+      -- Buscar adicción activa obligatoria
+      SELECT id INTO v_addiction_id
+      FROM core.user_addictions
+      WHERE user_id = NEW.user_id AND is_active = TRUE
+      LIMIT 1;
 
-  -- 2a. Consumo registrado -> romper racha
-  IF NEW.consumed = TRUE THEN
-    UPDATE core.streaks
-    SET status = 'broken', updated_at = NOW()
-    WHERE id = v_streak.id;
+      IF NOT FOUND THEN RETURN NEW; END IF;
 
-    INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
-    VALUES (v_streak.id, 'relapse', NOW(), v_streak.day_counter);
+      IF v_streak_id IS NULL THEN
+        -- Crear racha desde cero
+        INSERT INTO core.streaks (id, user_id, user_addiction_id, status, started_at, day_counter, last_log_date, updated_at)
+        VALUES (gen_random_uuid(), NEW.user_id, v_addiction_id, 'active', NEW.log_date, 1, NEW.log_date, NOW())
+        RETURNING id INTO v_streak_id;
+      ELSE
+        -- Reiniciar o Reactivar racha existente
+        UPDATE core.streaks
+        SET status = 'active', 
+            day_counter = CASE WHEN v_status = 'broken' THEN 1 ELSE v_day_counter + 1 END,
+            last_log_date = NEW.log_date,
+            updated_at = NOW()
+        WHERE id = v_streak_id;
+      END IF;
 
-  -- 2b. Sin consumo -> verificar continuidad
-  ELSIF v_streak.last_log_date IS NULL OR v_streak.last_log_date = v_yesterday THEN
-    UPDATE core.streaks
-    SET day_counter = day_counter + 1,
-        last_log_date = NEW.log_date,
-        updated_at = NOW()
-    WHERE id = v_streak.id;
+      -- Registrar evento de progreso en la "bitácora"
+      INSERT INTO tracking.streak_events (id, streak_id, event_type, event_date, days_achieved)
+      VALUES (gen_random_uuid(), v_streak_id, 'progress', NOW(), 
+             CASE WHEN v_status = 'broken' OR v_status IS NULL THEN 1 ELSE v_day_counter + 1 END);
 
-    INSERT INTO tracking.streak_events (streak_id, event_type, event_date, days_achieved)
-    VALUES (v_streak.id, 'progress', NOW(), v_streak.day_counter + 1);
+    -- B. Si ya tiene racha activa -> ACTUALIZACIÓN NORMAL
+    ELSIF v_status = 'active' THEN
+      -- Solo actualizar si el log es de una fecha nueva (evitar duplicados en el mismo día)
+      IF v_last_log_date IS NULL OR v_last_log_date < NEW.log_date THEN
+        UPDATE core.streaks
+        SET day_counter = day_counter + 1,
+            last_log_date = NEW.log_date,
+            updated_at = NOW()
+        WHERE id = v_streak_id;
+
+        INSERT INTO tracking.streak_events (id, streak_id, event_type, event_date, days_achieved)
+        VALUES (gen_random_uuid(), v_streak_id, 'progress', NOW(), v_day_counter + 1);
+      END IF;
+    END IF;
+
+  -- 3. ESCENARIO: RECAÍDA (consumed = TRUE)
+  ELSE
+    -- Rompemos racha si estaba activa o pausada
+    IF v_streak_id IS NOT NULL AND v_status IN ('active', 'paused') THEN
+      UPDATE core.streaks
+      SET status = 'broken', updated_at = NOW()
+      WHERE id = v_streak_id;
+
+      INSERT INTO tracking.streak_events (id, streak_id, event_type, event_date, days_achieved)
+      VALUES (gen_random_uuid(), v_streak_id, 'relapse', NOW(), v_day_counter);
+    END IF;
   END IF;
 
   RETURN NEW;
