@@ -51,8 +51,24 @@ model User {
   alerts                  EmergencyAlert[]
   streak                  Streak[]
   absences                LogAbsence[]
+  is_deleted              Boolean          @default(false)
+  deleted_at              DateTime?
+  password_reset_tokens   PasswordResetToken[]
 
   @@map("users")
+  @@schema("auth")
+}
+
+model PasswordResetToken {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  token      String   @unique
+  user_id    String   @db.Uuid
+  expires_at DateTime
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
   @@schema("auth")
 }
 
@@ -194,6 +210,7 @@ model SupportContact {
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
+  @@unique([user_id, email])
   @@map("support_contacts")
   @@schema("emergency")
 }
