@@ -216,6 +216,87 @@ BEGIN
 END;
 $$;
 
+-- 6. core.fn_graduate_user
+-- "Gradúa" a un adicto para que pase a ser padrino.
+CREATE OR REPLACE FUNCTION core.fn_graduate_user(p_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_role auth.UserRole;
+  v_new_sponsor_code VARCHAR(10);
+BEGIN
+  -- 1. Verificar rol actual
+  SELECT role INTO v_role FROM auth.users WHERE id = p_user_id;
+  IF v_role != 'ADICTO' THEN
+    RAISE NOTICE 'El usuario % ya es % o no es adicto.', p_user_id, v_role;
+    RETURN FALSE;
+  END IF;
+
+  -- 2. Generar código de padrino único (8 caracteres aleatorios)
+  v_new_sponsor_code := upper(substring(replace(gen_random_uuid()::text, '-', ''), 1, 8));
+
+  -- 3. Actualizar usuario: rol a PADRINO y asignar código
+  UPDATE auth.users
+  SET role = 'PADRINO',
+      sponsor_code = v_new_sponsor_code,
+      updated_at = NOW()
+  WHERE id = p_user_id;
+
+  -- 4. Cerrar patrocinios activos donde el graduado era el adicto
+  -- (Un padrino no puede ser ahijado de otro, según lógica de negocio implícita)
+  UPDATE core.sponsorships
+  SET status = 'INACTIVE',
+      ended_at = NOW(),
+      termination_reason = 'Usuario graduado a Padrino'
+  WHERE addict_id = p_user_id AND status = 'ACTIVE';
+
+  RETURN TRUE;
+END;
+$$;
+
+-- 7. core.fn_relapse_user
+-- "Degrada" a un padrino tras una recaída o decisión manual.
+CREATE OR REPLACE FUNCTION core.fn_relapse_user(p_user_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_role auth.UserRole;
+BEGIN
+  -- 1. Verificar rol actual
+  SELECT role INTO v_role FROM auth.users WHERE id = p_user_id;
+  
+  -- Solo actuar si es Padrino
+  IF v_role != 'PADRINO' THEN
+    RAISE NOTICE 'El usuario % no es Padrino.', p_user_id;
+    RETURN FALSE;
+  END IF;
+
+  -- 2. Actualizar usuario: rol a ADICTO y remover código de padrino
+  UPDATE auth.users
+  SET role = 'ADICTO',
+      sponsor_code = NULL,
+      updated_at = NOW()
+  WHERE id = p_user_id;
+
+  -- 3. Cerrar patrocinios activos donde este usuario era el SPONSOR
+  UPDATE core.sponsorships
+  SET status = 'INACTIVE',
+      ended_at = NOW(),
+      termination_reason = 'Padrino degradado por recaída o cambio de rol'
+  WHERE sponsor_id = p_user_id AND status = 'ACTIVE';
+
+  -- 4. Romper racha si tiene una activa (aunque el trigger de daily_logs lo haría al insertar log)
+  UPDATE core.streaks
+  SET status = 'broken', 
+      updated_at = NOW()
+  WHERE user_id = p_user_id AND status = 'active';
+
+  RETURN TRUE;
+END;
+$$;
+
 -- ==========================================
 -- INDEXES
 -- ==========================================
@@ -234,6 +315,10 @@ ON tracking.log_absences (streak_id, (detected_at::date));
 
 CREATE UNIQUE INDEX IF NOT EXISTS single_active_sponsorship_per_addict
 ON core.sponsorships (addict_id) WHERE status = 'ACTIVE';
+
+-- Permitir re-registro si la cuenta previa está eliminada (soft-delete)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_active 
+ON auth.users (email) WHERE is_deleted IS FALSE;
 
 -- ==========================================
 -- WINDOW FUNCTIONS (VIEWS)

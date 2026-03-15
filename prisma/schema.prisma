@@ -35,7 +35,7 @@ enum SponsorshipStatus {
 model User {
   id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String   @db.VarChar(100)
-  email         String   @unique @db.VarChar(150)
+  email         String   @db.VarChar(150)
   password_hash String   @db.Text
   role          UserRole @default(ADICTO)
   created_at    DateTime @default(now())
