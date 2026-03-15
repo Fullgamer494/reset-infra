@@ -496,15 +496,15 @@ INSERT INTO queries (project_id, query_description, query_sql, target_table, que
 -- EMERGENCY
 -- ==========================================
 (3, 'Registrar contacto de emergencia',
-'INSERT INTO emergency.support_contacts (id, user_id, name, relationship, phone_number, email, priority_level, is_active, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE, NOW(), NOW());',
+'INSERT INTO emergency.support_contacts (id, user_id, name, relationship, email, priority_level, is_active, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, TRUE, NOW(), NOW());',
 'emergency.support_contacts', 'WRITE_OPERATION'),
 
 (3, 'Listar contactos de emergencia activos de un usuario',
-'SELECT id, user_id, name, relationship, phone_number, email, priority_level, is_active, created_at FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_level ASC, created_at ASC;',
+'SELECT id, user_id, name, relationship, email, priority_level, is_active, created_at FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_level ASC, created_at ASC;',
 'emergency.support_contacts', 'SIMPLE_SELECT'),
 
 (3, 'Actualizar contacto de emergencia',
-'UPDATE emergency.support_contacts SET name = COALESCE($2, name), relationship = COALESCE($3, relationship), phone_number = COALESCE($4, phone_number), email = COALESCE($5, email), priority_level = COALESCE($6, priority_level), is_active = COALESCE($7, is_active), updated_at = NOW() WHERE id = $1;',
+'UPDATE emergency.support_contacts SET name = COALESCE($2, name), relationship = COALESCE($3, relationship), email = COALESCE($4, email), priority_level = COALESCE($5, priority_level), is_active = COALESCE($6, is_active), updated_at = NOW() WHERE id = $1;',
 'emergency.support_contacts', 'WRITE_OPERATION'),
 
 (3, 'Disparar alerta de emergencia — Botón de pánico (UDF)',
@@ -512,7 +512,7 @@ INSERT INTO queries (project_id, query_description, query_sql, target_table, que
 'emergency.emergency_alerts', 'WRITE_OPERATION'),
 
 (3, 'Obtener contactos activos tras alerta para envío de notificaciones',
-'SELECT id, user_id, name, email, phone_number, priority_level FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_level ASC;',
+'SELECT id, user_id, name, email, priority_level FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_level ASC;',
 'emergency.support_contacts', 'SIMPLE_SELECT'),
 
 -- ==========================================

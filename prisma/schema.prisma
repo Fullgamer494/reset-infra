@@ -231,7 +231,6 @@ model SupportContact {
   id                  String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id             String   @db.Uuid
   contact_name        String   @db.VarChar(100)
-  phone               String   @default("") @db.VarChar(20)
   email               String   @default("") @db.VarChar(150)
   relationship        String   @default("") @db.VarChar(50)
   custom_relationship String   @default("") @db.Text
