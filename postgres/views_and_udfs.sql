@@ -208,8 +208,8 @@ DECLARE
   v_found BOOLEAN := FALSE;
 BEGIN
   UPDATE core.sponsorships
-  SET is_active = FALSE, ended_at = NOW(), termination_reason = p_reason
-  WHERE sponsor_id = p_sponsor_id AND is_active = TRUE;
+  SET status = 'INACTIVE', ended_at = NOW(), termination_reason = p_reason
+  WHERE sponsor_id = p_sponsor_id AND status = 'ACTIVE';
   
   GET DIAGNOSTICS v_found = ROW_COUNT;
   RETURN v_found > 0;
@@ -496,15 +496,15 @@ INSERT INTO queries (project_id, query_description, query_sql, target_table, que
 -- EMERGENCY
 -- ==========================================
 (3, 'Registrar contacto de emergencia',
-'INSERT INTO emergency.support_contacts (id, user_id, name, relationship, email, priority_level, is_active, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, TRUE, NOW(), NOW());',
+'INSERT INTO emergency.support_contacts (id, user_id, contact_name, relationship, email, priority_order, is_active, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, TRUE, NOW(), NOW());',
 'emergency.support_contacts', 'WRITE_OPERATION'),
 
 (3, 'Listar contactos de emergencia activos de un usuario',
-'SELECT id, user_id, name, relationship, email, priority_level, is_active, created_at FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_level ASC, created_at ASC;',
+'SELECT id, user_id, contact_name, relationship, email, priority_order, is_active, created_at FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_order ASC, created_at ASC;',
 'emergency.support_contacts', 'SIMPLE_SELECT'),
 
 (3, 'Actualizar contacto de emergencia',
-'UPDATE emergency.support_contacts SET name = COALESCE($2, name), relationship = COALESCE($3, relationship), email = COALESCE($4, email), priority_level = COALESCE($5, priority_level), is_active = COALESCE($6, is_active), updated_at = NOW() WHERE id = $1;',
+'UPDATE emergency.support_contacts SET contact_name = COALESCE($2, contact_name), relationship = COALESCE($3, relationship), email = COALESCE($4, email), priority_order = COALESCE($5, priority_order), is_active = COALESCE($6, is_active), updated_at = NOW() WHERE id = $1;',
 'emergency.support_contacts', 'WRITE_OPERATION'),
 
 (3, 'Disparar alerta de emergencia — Botón de pánico (UDF)',
@@ -512,7 +512,7 @@ INSERT INTO queries (project_id, query_description, query_sql, target_table, que
 'emergency.emergency_alerts', 'WRITE_OPERATION'),
 
 (3, 'Obtener contactos activos tras alerta para envío de notificaciones',
-'SELECT id, user_id, name, email, priority_level FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_level ASC;',
+'SELECT id, user_id, contact_name, email, priority_order FROM emergency.support_contacts WHERE user_id = $1 AND is_active = TRUE ORDER BY priority_order ASC;',
 'emergency.support_contacts', 'SIMPLE_SELECT'),
 
 -- ==========================================
