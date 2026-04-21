@@ -11,6 +11,10 @@ dist/
 prisma/*.db
 prisma/*.db-journal
 
+# Postgres scripts
+postgres/admin_user.sql
+postgres/roles_and_permissions.sql
+
 # Generated (regenerable via db:generate)
 src/schemas/*.ts
 !src/schemas/.gitkeep

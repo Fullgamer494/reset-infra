@@ -324,7 +324,7 @@ ON auth.users (email) WHERE is_deleted IS FALSE;
 -- WINDOW FUNCTIONS (VIEWS)
 -- ==========================================
 
--- WF-01 Ranking: Obtener el ÃƒÂºltimo log de cada usuario
+-- WF-01 Ranking: Obtener el Algoritmo log de cada usuario
 CREATE OR REPLACE VIEW tracking.v_user_latest_log AS
 WITH ranked_logs AS (
   SELECT
@@ -347,7 +347,7 @@ WITH ranked_logs AS (
 )
 SELECT * FROM ranked_logs WHERE rn = 1;
 
--- WF-02 Agregaciónn con marco de ventana: Promedio móvil craving 7 días
+-- WF-02 Agregación con marco de ventana: Promedio móvil craving 7 días
 CREATE OR REPLACE VIEW tracking.v_user_craving_moving_avg AS
 SELECT
   dl.user_id,
